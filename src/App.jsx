@@ -10,17 +10,26 @@ import Poker from './components/Poker'
 import AdminModal from './components/AdminModal'
 import WeekendManageModal from './components/WeekendManageModal'
 import ProfileGate from './components/ProfileGate'
+import InstallGate from './components/InstallGate'
 import Toast from './components/Toast'
 import { isSupabaseConfigured } from './lib/supabaseClient'
 import { buildNotifyLink } from './lib/whatsapp'
 import * as api from './lib/api'
 
 const WEEKEND_KEY = 'coweplope_current_weekend'
+const INSTALL_GATE_KEY = 'coweplope_install_gate_dismissed'
 const VALID_TABS = ['dashboard', 'lodging', 'agenda', 'shopping', 'widgets', 'poker']
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+}
 
 export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [installGateDismissed, setInstallGateDismissed] = useState(
+    () => isStandalone() || localStorage.getItem(INSTALL_GATE_KEY) === '1'
+  )
 
   const [members, setMembers] = useState([])
   const [weekends, setWeekends] = useState([])
@@ -280,6 +289,17 @@ export default function App() {
   async function handleDeletePokerGame(id) {
     await api.deletePokerGame(id)
     await reloadWeekendData()
+  }
+
+  if (!installGateDismissed) {
+    return (
+      <InstallGate
+        onContinue={() => {
+          localStorage.setItem(INSTALL_GATE_KEY, '1')
+          setInstallGateDismissed(true)
+        }}
+      />
+    )
   }
 
   if (loading) {

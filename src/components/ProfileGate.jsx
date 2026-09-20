@@ -12,7 +12,7 @@ export default function ProfileGate({ members, onSelect, onAddMember }) {
       <div className="w-full max-w-sm">
         <img src="/logo.png" alt="Coweplope" className="w-40 h-40 mx-auto mb-4" />
         <h1 className="text-xl font-bold text-zinc-100 text-center mb-1">Coweplope Organizer</h1>
-        <p className="text-sm text-zinc-500 text-center mb-6">Qui es-tu ?</p>
+        <p className="text-sm text-zinc-500 text-center mb-6">Quel coweplopeur es-tu ?</p>
 
         {members.length > 0 && (
           <div className="grid grid-cols-2 gap-3 mb-4">
