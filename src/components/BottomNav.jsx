@@ -1,17 +1,18 @@
-import { LayoutDashboard, Home, CalendarDays, ShoppingCart, Wallet } from 'lucide-react'
+import { LayoutDashboard, Home, CalendarDays, ShoppingCart, Wallet, Spade } from 'lucide-react'
 
 const TABS = [
   { key: 'dashboard', label: 'Accueil', icon: LayoutDashboard },
   { key: 'lodging', label: 'Logements', icon: Home },
   { key: 'agenda', label: 'Agenda', icon: CalendarDays },
   { key: 'shopping', label: 'Courses', icon: ShoppingCart },
-  { key: 'widgets', label: 'Widgets', icon: Wallet },
+  { key: 'widgets', label: 'Dépenses', icon: Wallet },
+  { key: 'poker', label: 'Poker', icon: Spade },
 ]
 
 export default function BottomNav({ active, onChange }) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 pb-[env(safe-area-inset-bottom)]">
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-6">
         {TABS.map(({ key, label, icon: Icon }) => {
           const isActive = active === key
           return (

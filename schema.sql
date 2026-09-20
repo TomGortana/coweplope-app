@@ -252,3 +252,18 @@ join members m on m.name = v.name;
 -- devrait pas être ici, mais en attente de review). Ajoute les
 -- tiens à la suite, avec la date.
 -- ============================================================
+
+-- 2026-09-20 : présence des membres par week-end.
+-- Un membre est considéré PRÉSENT par défaut sur une édition ; une ligne
+-- ici ne représente que les ABSENCES explicites (pas besoin de lister
+-- tout le monde à chaque fois).
+create table if not exists weekend_absences (
+  id uuid primary key default gen_random_uuid(),
+  weekend_id uuid not null references weekends(id) on delete cascade,
+  member_id uuid not null references members(id) on delete cascade,
+  created_at timestamptz default now(),
+  unique (weekend_id, member_id)
+);
+
+alter table weekend_absences enable row level security;
+create policy "allow all - weekend_absences" on weekend_absences for all using (true) with check (true);

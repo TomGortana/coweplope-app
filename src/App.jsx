@@ -6,6 +6,7 @@ import Lodging from './components/Lodging'
 import Agenda from './components/Agenda'
 import Shopping from './components/Shopping'
 import Widgets from './components/Widgets'
+import Poker from './components/Poker'
 import AdminModal from './components/AdminModal'
 import Toast from './components/Toast'
 import { isSupabaseConfigured } from './lib/supabaseClient'
@@ -34,12 +35,17 @@ export default function App() {
   const [shoppingItems, setShoppingItems] = useState([])
   const [poker, setPoker] = useState({ games: [], results: [] })
   const [tricountLink, setTricountLinkState] = useState(null)
+  const [absentMemberIds, setAbsentMemberIds] = useState([])
 
   const membersById = useMemo(() => Object.fromEntries(members.map((m) => [m.id, m])), [members])
   const currentMember = membersById[currentMemberId] || members[0]
   const currentWeekend = weekends.find((w) => w.id === currentWeekendId) || weekends[0]
   const isArchived = currentWeekend?.status === 'archived'
-  const balances = api.getTricountBalances(members)
+  const presentMembers = useMemo(
+    () => members.filter((m) => !absentMemberIds.includes(m.id)),
+    [members, absentMemberIds]
+  )
+  const balances = api.getTricountBalances(presentMembers)
 
   // Chargement initial : membres + éditions
   useEffect(() => {
@@ -76,18 +82,20 @@ export default function App() {
 
   const reloadWeekendData = useCallback(async () => {
     if (!currentWeekendId) return
-    const [l, a, s, p, t] = await Promise.all([
+    const [l, a, s, p, t, absent] = await Promise.all([
       api.getLodgingData(currentWeekendId),
       api.getAgendaEvents(currentWeekendId),
       api.getShoppingItems(currentWeekendId),
       api.getPokerData(currentWeekendId),
       api.getTricountLink(currentWeekendId),
+      api.getWeekendAttendance(currentWeekendId),
     ])
     setLodging(l)
     setAgendaEvents(a)
     setShoppingItems(s)
     setPoker(p)
     setTricountLinkState(t)
+    setAbsentMemberIds(absent)
   }, [currentWeekendId])
 
   useEffect(() => {
@@ -112,6 +120,13 @@ export default function App() {
     setWeekends((prev) => [w, ...prev])
     setCurrentWeekendId(w.id)
     notify(`Édition "${name}" créée.`, `${actorTag()} a créé une nouvelle édition : ${name} sur ${APP_NAME} !`)
+  }
+
+  async function handleSaveWeekendSettings(weekendId, { name, start_date, end_date, absentMemberIds: newAbsentIds }) {
+    const w = await api.updateWeekend(weekendId, { name, start_date, end_date })
+    await api.setWeekendAttendance(weekendId, newAbsentIds)
+    setWeekends((prev) => prev.map((x) => (x.id === weekendId ? w : x)))
+    if (weekendId === currentWeekend?.id) await reloadWeekendData()
   }
 
   async function handleAddLodging(data) {
@@ -225,6 +240,8 @@ export default function App() {
         currentWeekend={currentWeekend}
         onChangeWeekend={setCurrentWeekendId}
         onOpenAdmin={() => setAdminOpen(true)}
+        absentMemberIds={absentMemberIds}
+        onSaveWeekendSettings={handleSaveWeekendSettings}
       />
 
       <main className="pb-24">
@@ -287,7 +304,15 @@ export default function App() {
             balances={balances}
             membersById={membersById}
             currentMember={currentMember}
+          />
+        )}
+
+        {activeTab === 'poker' && (
+          <Poker
             poker={poker}
+            membersById={membersById}
+            members={members}
+            absentMemberIds={absentMemberIds}
             onAddGame={handleAddPokerGame}
             onSetResult={handleSetPokerResult}
             onDeleteGame={handleDeletePokerGame}

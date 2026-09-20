@@ -1,10 +1,22 @@
 import { useState } from 'react'
-import { ChevronDown, MessageCircle, Settings, Check } from 'lucide-react'
+import { ChevronDown, MessageCircle, Settings, Check, Pencil } from 'lucide-react'
 import { getWhatsAppGroupLink } from '../lib/whatsapp'
+import WeekendManageModal from './WeekendManageModal'
 
-export default function Header({ members, currentMember, onChangeMember, weekends, currentWeekend, onChangeWeekend, onOpenAdmin }) {
+export default function Header({
+  members,
+  currentMember,
+  onChangeMember,
+  weekends,
+  currentWeekend,
+  onChangeWeekend,
+  onOpenAdmin,
+  absentMemberIds,
+  onSaveWeekendSettings,
+}) {
   const [memberOpen, setMemberOpen] = useState(false)
   const [weekendOpen, setWeekendOpen] = useState(false)
+  const [manageOpen, setManageOpen] = useState(false)
   const waLink = getWhatsAppGroupLink()
 
   return (
@@ -51,6 +63,20 @@ export default function Header({ members, currentMember, onChangeMember, weekend
 
       {weekendOpen && (
         <div className="px-4 pb-3">
+          <div className="flex items-center justify-between px-1 pb-2">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Éditions</p>
+            {currentWeekend && (
+              <button
+                onClick={() => {
+                  setManageOpen(true)
+                  setWeekendOpen(false)
+                }}
+                className="flex items-center gap-1 text-xs font-semibold text-indigo-600 active:opacity-70"
+              >
+                <Pencil size={12} /> Modifier / présence
+              </button>
+            )}
+          </div>
           <div className="bg-slate-50 rounded-2xl p-2 space-y-1">
             {weekends.map((w) => (
               <button
@@ -94,6 +120,16 @@ export default function Header({ members, currentMember, onChangeMember, weekend
             ))}
           </div>
         </div>
+      )}
+
+      {manageOpen && currentWeekend && (
+        <WeekendManageModal
+          weekend={currentWeekend}
+          members={members}
+          absentMemberIds={absentMemberIds}
+          onClose={() => setManageOpen(false)}
+          onSave={onSaveWeekendSettings}
+        />
       )}
     </header>
   )

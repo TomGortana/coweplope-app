@@ -63,6 +63,10 @@ export const pokerResults = [
   { id: 'r8', game_id: 'g2', member_id: 'm4', net_result: 5 },
 ]
 
+// Absences par week-end : une ligne = ce membre est absent sur cette
+// édition. Pas de ligne = présent par défaut.
+export const weekendAbsences = []
+
 export const tricountLinks = [
   { id: 't1', weekend_id: 'w1', url: 'https://tricount.com/xxxxx' },
 ]

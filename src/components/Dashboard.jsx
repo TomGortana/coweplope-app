@@ -69,7 +69,7 @@ export default function Dashboard({ currentMember, weekend, lodging, agenda, sho
 
       {leader && (
         <button
-          onClick={() => onNavigate('widgets')}
+          onClick={() => onNavigate('poker')}
           className="w-full bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3 active:bg-slate-50 transition text-left"
         >
           <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">

@@ -49,6 +49,56 @@ export async function createWeekend({ name, start_date, end_date }) {
   return w
 }
 
+export async function updateWeekend(id, { name, start_date, end_date }) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('weekends')
+      .update({ name, start_date, end_date })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+  await delay()
+  const w = mock.weekends.find((x) => x.id === id)
+  if (w) Object.assign(w, { name, start_date, end_date })
+  return w
+}
+
+// ---------- PRÉSENCE PAR WEEK-END ----------
+// Un membre est présent par défaut ; on ne stocke que les absences.
+export async function getWeekendAttendance(weekendId) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase.from('weekend_absences').select('member_id').eq('weekend_id', weekendId)
+    if (error) throw error
+    return data.map((r) => r.member_id)
+  }
+  await delay()
+  return mock.weekendAbsences.filter((a) => a.weekend_id === weekendId).map((a) => a.member_id)
+}
+
+export async function setWeekendAttendance(weekendId, absentMemberIds) {
+  if (isSupabaseConfigured) {
+    const { error: delError } = await supabase.from('weekend_absences').delete().eq('weekend_id', weekendId)
+    if (delError) throw delError
+    if (absentMemberIds.length) {
+      const { error: insError } = await supabase
+        .from('weekend_absences')
+        .insert(absentMemberIds.map((member_id) => ({ weekend_id: weekendId, member_id })))
+      if (insError) throw insError
+    }
+    return
+  }
+  await delay()
+  for (let i = mock.weekendAbsences.length - 1; i >= 0; i--) {
+    if (mock.weekendAbsences[i].weekend_id === weekendId) mock.weekendAbsences.splice(i, 1)
+  }
+  absentMemberIds.forEach((member_id) => {
+    mock.weekendAbsences.push({ id: mock.nextId(), weekend_id: weekendId, member_id })
+  })
+}
+
 // ---------- LOGEMENTS ----------
 export async function getLodgingData(weekendId) {
   if (isSupabaseConfigured) {
@@ -311,19 +361,28 @@ export async function getPokerData(weekendId) {
   return { games, results }
 }
 
-export async function addPokerGame(weekend_id, { game_date, variant, buy_in }) {
+export async function addPokerGame(weekend_id, { game_date, variant, buy_in, participant_ids = [] }) {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
+    const { data: game, error } = await supabase
       .from('poker_games')
       .insert({ weekend_id, game_date, variant, buy_in })
       .select()
       .single()
     if (error) throw error
-    return data
+    if (participant_ids.length) {
+      const { error: e2 } = await supabase
+        .from('poker_results')
+        .insert(participant_ids.map((member_id) => ({ game_id: game.id, member_id, net_result: 0 })))
+      if (e2) throw e2
+    }
+    return game
   }
   await delay()
   const g = { id: mock.nextId(), weekend_id, game_date, variant, buy_in }
   mock.pokerGames.push(g)
+  participant_ids.forEach((member_id) => {
+    mock.pokerResults.push({ id: mock.nextId(), game_id: g.id, member_id, net_result: 0 })
+  })
   return g
 }
 
