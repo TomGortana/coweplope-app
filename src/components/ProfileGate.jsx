@@ -11,7 +11,7 @@ export default function ProfileGate({ members, onSelect, onAddMember }) {
     <div className="fixed inset-0 z-50 bg-zinc-800 overflow-y-auto">
       <div className="min-h-full flex flex-col items-center justify-center px-6 py-6">
         <div className="w-full max-w-sm">
-          <img src="/logo.png" alt="Coweplope" className="w-28 h-28 mx-auto mb-3" />
+          <img src="/logo.png" alt="Coweplope" className="w-56 h-56 mx-auto mb-3" />
           <h1 className="text-lg font-bold text-zinc-100 text-center mb-1">Coweplope Organizer</h1>
           <p className="text-sm text-zinc-500 text-center mb-4">Quel coweplopeur es-tu ?</p>
 
