@@ -15,7 +15,6 @@ import { isSupabaseConfigured } from './lib/supabaseClient'
 import { buildNotifyLink } from './lib/whatsapp'
 import * as api from './lib/api'
 
-const MEMBER_KEY = 'coweplope_current_member'
 const WEEKEND_KEY = 'coweplope_current_weekend'
 
 export default function App() {
@@ -24,7 +23,10 @@ export default function App() {
 
   const [members, setMembers] = useState([])
   const [weekends, setWeekends] = useState([])
-  const [currentMemberId, setCurrentMemberId] = useState(localStorage.getItem(MEMBER_KEY) || '')
+  // Pas de mémorisation du profil : le ProfileGate est redemandé à
+  // chaque chargement (l'appareil peut être partagé entre plusieurs
+  // membres du groupe).
+  const [currentMemberId, setCurrentMemberId] = useState('')
   const [currentWeekendId, setCurrentWeekendId] = useState(localStorage.getItem(WEEKEND_KEY) || '')
 
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -68,10 +70,6 @@ export default function App() {
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  useEffect(() => {
-    if (currentMemberId) localStorage.setItem(MEMBER_KEY, currentMemberId)
-  }, [currentMemberId])
 
   useEffect(() => {
     if (currentWeekendId) localStorage.setItem(WEEKEND_KEY, currentWeekendId)
