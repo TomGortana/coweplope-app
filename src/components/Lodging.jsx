@@ -1,0 +1,237 @@
+import { useState } from 'react'
+import { Heart, ThumbsUp, Plus, ExternalLink, CheckCircle2, MessageSquare, X } from 'lucide-react'
+
+export default function Lodging({ proposals, votes, comments, membersById, currentMember, onAdd, onVote, onComment, onValidate, isArchived }) {
+  const [showForm, setShowForm] = useState(false)
+  const [openComments, setOpenComments] = useState(null)
+
+  return (
+    <div className="px-4 pt-4 pb-6 space-y-3">
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-bold text-slate-900">Logements</h1>
+        {!isArchived && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-1 text-sm font-semibold text-indigo-600 active:opacity-70"
+          >
+            <Plus size={18} /> Proposer
+          </button>
+        )}
+      </div>
+
+      {proposals.length === 0 && (
+        <p className="text-sm text-slate-400 py-8 text-center">Aucune proposition pour l'instant.</p>
+      )}
+
+      {proposals.map((p) => {
+        const pVotes = votes.filter((v) => v.proposal_id === p.id)
+        const hearts = pVotes.filter((v) => v.vote_type === 'heart')
+        const thumbs = pVotes.filter((v) => v.vote_type === 'thumbs_up')
+        const myHeart = pVotes.some((v) => v.member_id === currentMember.id && v.vote_type === 'heart')
+        const myThumb = pVotes.some((v) => v.member_id === currentMember.id && v.vote_type === 'thumbs_up')
+        const pComments = comments.filter((c) => c.proposal_id === p.id)
+        const author = membersById[p.created_by]
+
+        return (
+          <div
+            key={p.id}
+            className={`bg-white border rounded-2xl p-4 ${
+              p.status === 'validated' ? 'border-emerald-300 ring-1 ring-emerald-200' : 'border-slate-200'
+            } ${p.status === 'rejected' ? 'opacity-50' : ''}`}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  {p.status === 'validated' && <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />}
+                  <h3 className="font-semibold text-slate-900 truncate">{p.title}</h3>
+                </div>
+                {p.comment && <p className="text-sm text-slate-500 mt-0.5">{p.comment}</p>}
+              </div>
+              {p.price != null && <span className="shrink-0 text-sm font-bold text-slate-700">{p.price} €</span>}
+            </div>
+
+            <div className="flex items-center gap-3 mt-3 text-xs text-slate-400">
+              {author && <span>Proposé par {author.name}</span>}
+              {p.url && (
+                <a href={p.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-indigo-600 font-medium">
+                  <ExternalLink size={12} /> Voir l'annonce
+                </a>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 mt-3">
+              <VoteButton
+                icon={Heart}
+                active={myHeart}
+                count={hearts.length}
+                onClick={() => onVote(p.id, 'heart')}
+                disabled={isArchived}
+                activeClass="bg-rose-50 text-rose-600 border-rose-200"
+              />
+              <VoteButton
+                icon={ThumbsUp}
+                active={myThumb}
+                count={thumbs.length}
+                onClick={() => onVote(p.id, 'thumbs_up')}
+                disabled={isArchived}
+                activeClass="bg-sky-50 text-sky-600 border-sky-200"
+              />
+              <button
+                onClick={() => setOpenComments(openComments === p.id ? null : p.id)}
+                className="flex items-center gap-1 px-3 py-2 rounded-xl border border-slate-200 text-slate-500 text-xs font-semibold active:bg-slate-50"
+              >
+                <MessageSquare size={14} /> {pComments.length || ''}
+              </button>
+              {!isArchived && p.status === 'proposed' && (
+                <button
+                  onClick={() => onValidate(p.id)}
+                  className="ml-auto text-xs font-semibold text-emerald-600 active:opacity-70"
+                >
+                  Valider
+                </button>
+              )}
+            </div>
+
+            {openComments === p.id && (
+              <CommentThread
+                comments={pComments}
+                membersById={membersById}
+                currentMember={currentMember}
+                onComment={(text) => onComment(p.id, text)}
+                disabled={isArchived}
+              />
+            )}
+          </div>
+        )
+      })}
+
+      {showForm && <ProposalForm onClose={() => setShowForm(false)} onSubmit={onAdd} />}
+    </div>
+  )
+}
+
+function VoteButton({ icon: Icon, active, count, onClick, disabled, activeClass }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition active:scale-95 ${
+        active ? activeClass : 'border-slate-200 text-slate-500'
+      } ${disabled ? 'opacity-50' : ''}`}
+    >
+      <Icon size={14} fill={active ? 'currentColor' : 'none'} />
+      {count > 0 && count}
+    </button>
+  )
+}
+
+function CommentThread({ comments, membersById, currentMember, onComment, disabled }) {
+  const [text, setText] = useState('')
+  return (
+    <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
+      {comments.map((c) => {
+        const author = membersById[c.member_id]
+        return (
+          <div key={c.id} className="flex gap-2 text-sm">
+            <span className="shrink-0">{author?.avatar_emoji}</span>
+            <p className="text-slate-600">
+              <span className="font-semibold text-slate-800">{author?.name} </span>
+              {c.content}
+            </p>
+          </div>
+        )
+      })}
+      {!disabled && (
+        <div className="flex gap-2 pt-1">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={`Commenter en tant que ${currentMember.name}...`}
+            className="flex-1 px-3 py-2 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <button
+            onClick={() => {
+              if (!text.trim()) return
+              onComment(text.trim())
+              setText('')
+            }}
+            className="px-3 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold active:scale-95"
+          >
+            Envoyer
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ProposalForm({ onClose, onSubmit }) {
+  const [title, setTitle] = useState('')
+  const [url, setUrl] = useState('')
+  const [price, setPrice] = useState('')
+  const [comment, setComment] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const canSubmit = title.trim()
+
+  async function submit() {
+    if (!canSubmit) return
+    setSaving(true)
+    try {
+      await onSubmit({ title: title.trim(), url: url.trim() || null, price: price ? Number(price) : null, comment: comment.trim() || null })
+      onClose()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative w-full bg-white rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-slate-900">Proposer un logement</h2>
+          <button onClick={onClose} className="p-1 text-slate-400 active:text-slate-700">
+            <X size={22} />
+          </button>
+        </div>
+        <div className="space-y-3">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Nom du logement"
+            className="w-full px-4 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="Lien Airbnb / Booking"
+            className="w-full px-4 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <input
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            type="number"
+            inputMode="decimal"
+            placeholder="Prix total (€)"
+            className="w-full px-4 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Commentaire (optionnel)"
+            rows={2}
+            className="w-full px-4 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+          />
+          <button
+            onClick={submit}
+            disabled={!canSubmit || saving}
+            className="w-full bg-indigo-600 disabled:bg-slate-300 text-white font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
+          >
+            {saving ? 'Ajout…' : 'Ajouter la proposition'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
