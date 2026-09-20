@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Heart, ThumbsUp, Plus, ExternalLink, CheckCircle2, MessageSquare, X, Trash2 } from 'lucide-react'
 
-export default function Lodging({ proposals, votes, comments, membersById, currentMember, onAdd, onVote, onComment, onValidate, onDelete, isArchived }) {
+export default function Lodging({ proposals, votes, comments, membersById, currentMember, onAdd, onVote, onComment, onValidate, onUnvalidate, onDelete, isArchived }) {
   const [showForm, setShowForm] = useState(false)
   const [openComments, setOpenComments] = useState(null)
 
@@ -94,12 +94,22 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
               >
                 <MessageSquare size={14} /> {pComments.length || ''}
               </button>
-              {!isArchived && p.status === 'proposed' && (
+              {!isArchived && p.status !== 'validated' && (
                 <button
                   onClick={() => onValidate(p.id)}
                   className="ml-auto text-xs font-semibold text-emerald-600 active:opacity-70"
                 >
                   Valider
+                </button>
+              )}
+              {!isArchived && p.status === 'validated' && (
+                <button
+                  onClick={() => {
+                    if (window.confirm('Annuler la validation de ce logement ?')) onUnvalidate()
+                  }}
+                  className="ml-auto text-xs font-semibold text-slate-400 active:opacity-70"
+                >
+                  Dévalider
                 </button>
               )}
             </div>

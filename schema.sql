@@ -267,3 +267,38 @@ create table if not exists weekend_absences (
 
 alter table weekend_absences enable row level security;
 create policy "allow all - weekend_absences" on weekend_absences for all using (true) with check (true);
+
+-- 2026-09-20 : permettre de supprimer un membre sans que ça casse tout.
+-- Par défaut, Postgres bloque la suppression d'un membre référencé
+-- ailleurs (ex: Thomas a créé des articles de courses). On passe ces
+-- colonnes d'attribution en "on delete set null" : supprimer un membre
+-- anonymise ses anciennes entrées au lieu de les bloquer ou de les
+-- effacer. Noms de contraintes = convention par défaut de Postgres
+-- (table_colonne_fkey) ; si une ligne échoue avec "constraint ... does
+-- not exist", dis-le moi avec le message d'erreur exact et je corrige.
+alter table lodging_proposals drop constraint if exists lodging_proposals_created_by_fkey;
+alter table lodging_proposals add constraint lodging_proposals_created_by_fkey
+  foreign key (created_by) references members(id) on delete set null;
+
+alter table agenda_events drop constraint if exists agenda_events_responsible_id_fkey;
+alter table agenda_events add constraint agenda_events_responsible_id_fkey
+  foreign key (responsible_id) references members(id) on delete set null;
+
+alter table shopping_items drop constraint if exists shopping_items_assigned_to_fkey;
+alter table shopping_items add constraint shopping_items_assigned_to_fkey
+  foreign key (assigned_to) references members(id) on delete set null;
+
+alter table shopping_items drop constraint if exists shopping_items_created_by_fkey;
+alter table shopping_items add constraint shopping_items_created_by_fkey
+  foreign key (created_by) references members(id) on delete set null;
+
+alter table lodging_comments drop constraint if exists lodging_comments_member_id_fkey;
+alter table lodging_comments add constraint lodging_comments_member_id_fkey
+  foreign key (member_id) references members(id) on delete set null;
+
+-- 2026-09-20 : barème de gains poker défini une fois à la création de
+-- la partie (montant net pour le 1er/2e/3e) ; on ne fait plus que
+-- choisir qui finit à quelle place ensuite.
+alter table poker_games add column if not exists payout_1st numeric not null default 0;
+alter table poker_games add column if not exists payout_2nd numeric not null default 0;
+alter table poker_games add column if not exists payout_3rd numeric not null default 0;

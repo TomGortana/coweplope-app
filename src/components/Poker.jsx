@@ -80,6 +80,9 @@ function GameCard({ game, results, membersById, onSetResult, onDeleteGame, isArc
           <p className="text-xs text-slate-400">
             {new Date(game.game_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} · Cave {game.buy_in} €
           </p>
+          <p className="text-[11px] text-slate-300">
+            Barème : 1er +{game.payout_1st ?? 0}€ · 2e +{game.payout_2nd ?? 0}€ · 3e +{game.payout_3rd ?? 0}€
+          </p>
         </div>
         {!isArchived && (
           <div className="flex items-center gap-2">
@@ -126,35 +129,37 @@ function GameCard({ game, results, membersById, onSetResult, onDeleteGame, isArc
   )
 }
 
-// Saisie simplifiée : seuls le 1er, 2e et 3e ont un montant à renseigner
-// à la main, les autres participants restent à 0 € automatiquement.
+// Saisie simplifiée : le barème (gain du 1er/2e/3e) a été fixé à la
+// création de la partie. Ici on choisit juste qui a fini à quelle
+// place, et les gains sont calculés automatiquement. Les autres
+// participants restent à 0 € automatiquement.
 function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
+  const payouts = [Number(game.payout_1st) || 0, Number(game.payout_2nd) || 0, Number(game.payout_3rd) || 0]
   const rankCount = Math.min(RANK_LABELS.length, participants.length)
-  const sorted = [...results].sort((a, b) => Number(b.net_result) - Number(a.net_result))
-  const [podium, setPodium] = useState(() =>
-    Array.from({ length: rankCount }, (_, i) => ({
-      member_id: sorted[i] && Number(sorted[i].net_result) > 0 ? sorted[i].member_id : '',
-      amount: sorted[i] && Number(sorted[i].net_result) > 0 ? String(sorted[i].net_result) : '',
-    }))
+  const [ranking, setRanking] = useState(() =>
+    Array.from({ length: rankCount }, (_, i) => {
+      const r = results.find((res) => Number(res.net_result) === payouts[i] && payouts[i] > 0)
+      return r ? r.member_id : ''
+    })
   )
   const [saving, setSaving] = useState(false)
 
-  function updateRank(i, field, value) {
-    setPodium((prev) => prev.map((p, idx) => (idx === i ? { ...p, [field]: value } : p)))
+  function updateRank(i, value) {
+    setRanking((prev) => prev.map((v, idx) => (idx === i ? value : v)))
   }
 
   function optionsFor(i) {
-    const chosenElsewhere = podium.filter((_, idx) => idx !== i).map((p) => p.member_id)
-    return participants.filter((m) => !chosenElsewhere.includes(m.id) || m.id === podium[i].member_id)
+    const chosenElsewhere = ranking.filter((_, idx) => idx !== i)
+    return participants.filter((m) => !chosenElsewhere.includes(m.id) || m.id === ranking[i])
   }
 
   async function save() {
     setSaving(true)
     try {
-      const winners = podium.filter((p) => p.member_id)
-      const winnerIds = new Set(winners.map((p) => p.member_id))
+      const winners = ranking.map((member_id, i) => ({ member_id, amount: payouts[i] })).filter((w) => w.member_id)
+      const winnerIds = new Set(winners.map((w) => w.member_id))
       await Promise.all([
-        ...winners.map((p) => onSetResult(game.id, p.member_id, Number(p.amount) || 0)),
+        ...winners.map((w) => onSetResult(game.id, w.member_id, w.amount)),
         ...participants.filter((m) => !winnerIds.has(m.id)).map((m) => onSetResult(game.id, m.id, 0)),
       ])
       onDone()
@@ -165,12 +170,14 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
 
   return (
     <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
-      {podium.map((p, i) => (
+      {ranking.map((memberId, i) => (
         <div key={i} className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400 w-6 shrink-0">{RANK_LABELS[i]}</span>
+          <span className="text-xs font-semibold text-slate-400 w-16 shrink-0">
+            {RANK_LABELS[i]} (+{payouts[i]}€)
+          </span>
           <select
-            value={p.member_id}
-            onChange={(e) => updateRank(i, 'member_id', e.target.value)}
+            value={memberId}
+            onChange={(e) => updateRank(i, e.target.value)}
             className="flex-1 px-2 py-2 rounded-lg bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="">—</option>
@@ -180,15 +187,6 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
               </option>
             ))}
           </select>
-          <input
-            type="number"
-            inputMode="decimal"
-            value={p.amount}
-            onChange={(e) => updateRank(i, 'amount', e.target.value)}
-            placeholder="€"
-            disabled={!p.member_id}
-            className="w-20 text-right px-2 py-2 rounded-lg bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-40"
-          />
         </div>
       ))}
       <p className="text-[11px] text-slate-300">Les autres joueurs restent à 0 €.</p>
@@ -210,9 +208,11 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
   const [participantIds, setParticipantIds] = useState(
     () => new Set(members.filter((m) => !absentMemberIds.includes(m.id)).map((m) => m.id))
   )
+  const [payouts, setPayouts] = useState(['', '', ''])
   const [saving, setSaving] = useState(false)
 
   const canSubmit = date && variant.trim() && participantIds.size > 0
+  const payoutCount = Math.min(3, participantIds.size)
 
   function toggleParticipant(id) {
     setParticipantIds((prev) => {
@@ -221,6 +221,10 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
       else next.add(id)
       return next
     })
+  }
+
+  function updatePayout(i, value) {
+    setPayouts((prev) => prev.map((p, idx) => (idx === i ? value : p)))
   }
 
   async function submit() {
@@ -232,6 +236,9 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
         variant: variant.trim(),
         buy_in: Number(buyIn) || 0,
         participant_ids: [...participantIds],
+        payout_1st: Number(payouts[0]) || 0,
+        payout_2nd: Number(payouts[1]) || 0,
+        payout_3rd: Number(payouts[2]) || 0,
       })
       onClose()
     } finally {
@@ -296,6 +303,25 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
                   </button>
                 )
               })}
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-slate-400 font-medium">Gains du 1er / 2e / 3e (€)</label>
+            <p className="text-[11px] text-slate-300 mb-1">Défini une fois pour toutes, les scores se saisiront juste en choisissant le classement.</p>
+            <div className="flex gap-2">
+              {RANK_LABELS.slice(0, payoutCount).map((label, i) => (
+                <div key={label} className="flex-1">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={payouts[i]}
+                    onChange={(e) => updatePayout(i, e.target.value)}
+                    placeholder={label}
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-100 text-sm text-center outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <p className="text-[10px] text-slate-300 text-center mt-0.5">{label}</p>
+                </div>
+              ))}
             </div>
           </div>
           <button

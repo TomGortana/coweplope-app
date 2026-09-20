@@ -129,6 +129,18 @@ export default function App() {
     if (weekendId === currentWeekend?.id) await reloadWeekendData()
   }
 
+  async function handleAddMember(data) {
+    const m = await api.addMember(data)
+    setMembers((prev) => [...prev, m])
+    notify(`${m.name} a été ajouté au groupe.`)
+  }
+
+  async function handleDeleteMember(id) {
+    await api.deleteMember(id)
+    setMembers((prev) => prev.filter((m) => m.id !== id))
+    if (currentMemberId === id) setCurrentMemberId('')
+  }
+
   async function handleAddLodging(data) {
     await api.addLodgingProposal(currentWeekend.id, { ...data, created_by: currentMember.id })
     await reloadWeekendData()
@@ -154,6 +166,11 @@ export default function App() {
 
   async function handleDeleteLodging(proposalId) {
     await api.deleteLodgingProposal(proposalId)
+    await reloadWeekendData()
+  }
+
+  async function handleUnvalidateLodging() {
+    await api.unvalidateLodging(currentWeekend.id)
     await reloadWeekendData()
   }
 
@@ -269,6 +286,7 @@ export default function App() {
             onVote={handleVoteLodging}
             onComment={handleCommentLodging}
             onValidate={handleValidateLodging}
+            onUnvalidate={handleUnvalidateLodging}
             onDelete={handleDeleteLodging}
             isArchived={isArchived}
           />
@@ -324,7 +342,15 @@ export default function App() {
       <Toast toast={toast} onClose={() => setToast(null)} />
       <BottomNav active={activeTab} onChange={setActiveTab} />
 
-      {adminOpen && <AdminModal onClose={() => setAdminOpen(false)} onCreateWeekend={handleCreateWeekend} />}
+      {adminOpen && (
+        <AdminModal
+          onClose={() => setAdminOpen(false)}
+          onCreateWeekend={handleCreateWeekend}
+          members={members}
+          onAddMember={handleAddMember}
+          onDeleteMember={handleDeleteMember}
+        />
+      )}
     </div>
   )
 }

@@ -22,6 +22,33 @@ export async function getMembers() {
   return mock.members
 }
 
+export async function addMember({ name, avatar_emoji, color }) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('members')
+      .insert({ name, avatar_emoji: avatar_emoji || '🙂', color: color || '#6366f1' })
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+  await delay()
+  const m = { id: mock.nextId(), name, avatar_emoji: avatar_emoji || '🙂', color: color || '#6366f1' }
+  mock.members.push(m)
+  return m
+}
+
+export async function deleteMember(id) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('members').delete().eq('id', id)
+    if (error) throw error
+    return
+  }
+  await delay()
+  const idx = mock.members.findIndex((m) => m.id === id)
+  if (idx >= 0) mock.members.splice(idx, 1)
+}
+
 // ---------- WEEKENDS ----------
 export async function getWeekends() {
   if (isSupabaseConfigured) {
@@ -197,13 +224,29 @@ export async function addLodgingComment(proposal_id, member_id, content) {
 
 export async function deleteLodgingProposal(id) {
   if (isSupabaseConfigured) {
+    const { data: proposal } = await supabase.from('lodging_proposals').select('weekend_id, status').eq('id', id).single()
     const { error } = await supabase.from('lodging_proposals').delete().eq('id', id)
     if (error) throw error
+    // si on supprime LE logement validé, les autres ne doivent pas rester
+    // bloqués en "rejected" sans plus aucun moyen d'être validés
+    if (proposal?.status === 'validated') {
+      await supabase
+        .from('lodging_proposals')
+        .update({ status: 'proposed' })
+        .eq('weekend_id', proposal.weekend_id)
+        .eq('status', 'rejected')
+    }
     return
   }
   await delay()
   const idx = mock.lodgingProposals.findIndex((p) => p.id === id)
+  const deleted = idx >= 0 ? mock.lodgingProposals[idx] : null
   if (idx >= 0) mock.lodgingProposals.splice(idx, 1)
+  if (deleted?.status === 'validated') {
+    mock.lodgingProposals.forEach((p) => {
+      if (p.weekend_id === deleted.weekend_id && p.status === 'rejected') p.status = 'proposed'
+    })
+  }
   // mirroring `on delete cascade` from schema.sql for the mock store
   for (let i = mock.lodgingVotes.length - 1; i >= 0; i--) {
     if (mock.lodgingVotes[i].proposal_id === id) mock.lodgingVotes.splice(i, 1)
@@ -230,6 +273,20 @@ export async function validateLodging(weekend_id, proposal_id) {
     if (p.weekend_id === weekend_id) p.status = p.id === proposal_id ? 'validated' : 'rejected'
   })
   return mock.lodgingProposals.find((p) => p.id === proposal_id)
+}
+
+// Annule la validation en cours : tout le monde redevient "proposed"
+// pour repartir sur un vote propre.
+export async function unvalidateLodging(weekend_id) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('lodging_proposals').update({ status: 'proposed' }).eq('weekend_id', weekend_id)
+    if (error) throw error
+    return
+  }
+  await delay()
+  mock.lodgingProposals.forEach((p) => {
+    if (p.weekend_id === weekend_id) p.status = 'proposed'
+  })
 }
 
 // ---------- AGENDA ----------
@@ -361,11 +418,14 @@ export async function getPokerData(weekendId) {
   return { games, results }
 }
 
-export async function addPokerGame(weekend_id, { game_date, variant, buy_in, participant_ids = [] }) {
+export async function addPokerGame(
+  weekend_id,
+  { game_date, variant, buy_in, participant_ids = [], payout_1st = 0, payout_2nd = 0, payout_3rd = 0 }
+) {
   if (isSupabaseConfigured) {
     const { data: game, error } = await supabase
       .from('poker_games')
-      .insert({ weekend_id, game_date, variant, buy_in })
+      .insert({ weekend_id, game_date, variant, buy_in, payout_1st, payout_2nd, payout_3rd })
       .select()
       .single()
     if (error) throw error
@@ -378,7 +438,7 @@ export async function addPokerGame(weekend_id, { game_date, variant, buy_in, par
     return game
   }
   await delay()
-  const g = { id: mock.nextId(), weekend_id, game_date, variant, buy_in }
+  const g = { id: mock.nextId(), weekend_id, game_date, variant, buy_in, payout_1st, payout_2nd, payout_3rd }
   mock.pokerGames.push(g)
   participant_ids.forEach((member_id) => {
     mock.pokerResults.push({ id: mock.nextId(), game_id: g.id, member_id, net_result: 0 })
