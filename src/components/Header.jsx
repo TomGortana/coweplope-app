@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { ChevronDown, MessageCircle, Settings, Check, Pencil } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { ChevronDown, MessageCircle, Settings, Check, Pencil, Camera } from 'lucide-react'
 import { getWhatsAppGroupLink } from '../lib/whatsapp'
 import Avatar from './Avatar'
 
@@ -12,10 +12,25 @@ export default function Header({
   onChangeWeekend,
   onOpenAdmin,
   onOpenManageWeekend,
+  onUpdateMemberPhoto,
 }) {
   const [memberOpen, setMemberOpen] = useState(false)
   const [weekendOpen, setWeekendOpen] = useState(false)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const photoInputRef = useRef(null)
   const waLink = getWhatsAppGroupLink()
+
+  async function handlePhotoChange(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !currentMember) return
+    setUploadingPhoto(true)
+    try {
+      await onUpdateMemberPhoto(currentMember.id, file)
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-30 bg-zinc-800 border-b border-zinc-700">
@@ -95,6 +110,34 @@ export default function Header({
 
       {memberOpen && (
         <div className="px-4 pb-3">
+          {currentMember && (
+            <div className="bg-zinc-700/60 rounded-2xl p-3 mb-2 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="relative disabled:opacity-50"
+                aria-label="Changer ma photo"
+              >
+                <Avatar member={currentMember} size="lg" />
+                <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center">
+                  <Camera size={10} className="text-zinc-950" />
+                </span>
+              </button>
+              <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-zinc-200 truncate">{currentMember.name}</p>
+                <button
+                  type="button"
+                  onClick={() => photoInputRef.current?.click()}
+                  disabled={uploadingPhoto}
+                  className="text-xs font-medium text-amber-400 active:opacity-70 disabled:opacity-50"
+                >
+                  {uploadingPhoto ? 'Envoi…' : 'Changer ma photo'}
+                </button>
+              </div>
+            </div>
+          )}
           <div className="bg-zinc-700/60 rounded-2xl p-2 grid grid-cols-4 gap-1">
             {members.map((m) => (
               <button

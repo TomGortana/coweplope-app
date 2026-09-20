@@ -148,10 +148,17 @@ export default function App() {
     if (currentMemberId === id) setCurrentMemberId('')
   }
 
-  async function handleAddMemberAndSelect(data) {
-    const m = await api.addMember(data)
+  async function handleAddMemberAndSelect({ name, color, photoFile }) {
+    const photo_url = photoFile ? await api.uploadMemberPhoto(photoFile) : null
+    const m = await api.addMember({ name, color, photo_url })
     setMembers((prev) => [...prev, m])
     setCurrentMemberId(m.id)
+  }
+
+  async function handleUpdateMemberPhoto(id, file) {
+    const photo_url = await api.uploadMemberPhoto(file)
+    const m = await api.updateMemberPhoto(id, photo_url)
+    setMembers((prev) => prev.map((x) => (x.id === id ? m : x)))
   }
 
   async function handleAddLodging(data) {
@@ -275,6 +282,7 @@ export default function App() {
         onChangeWeekend={setCurrentWeekendId}
         onOpenAdmin={() => setAdminOpen(true)}
         onOpenManageWeekend={() => setManageWeekendOpen(true)}
+        onUpdateMemberPhoto={handleUpdateMemberPhoto}
       />
 
       <main className="pb-24">

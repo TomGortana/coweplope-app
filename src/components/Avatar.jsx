@@ -5,10 +5,21 @@ const SIZES = {
   xl: 'w-14 h-14 text-lg',
 }
 
-// Avatar sobre : initiale du prénom sur un rond teinté de la couleur du
-// membre, à la place d'un emoji.
+// Avatar sobre : photo de profil si elle existe, sinon l'initiale du
+// prénom sur un rond teinté de la couleur du membre.
 export default function Avatar({ member, size = 'md', className = '' }) {
   if (!member) return null
+
+  if (member.photo_url) {
+    return (
+      <img
+        src={member.photo_url}
+        alt={member.name}
+        className={`inline-block shrink-0 rounded-full object-cover ${SIZES[size]} ${className}`}
+      />
+    )
+  }
+
   const color = member.color || '#6366f1'
   return (
     <span

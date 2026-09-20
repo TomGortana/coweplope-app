@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Plus, Camera } from 'lucide-react'
 import Avatar from './Avatar'
 
 const COLOR_PRESETS = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#0ea5e9', '#ef4444']
@@ -47,15 +47,25 @@ export default function ProfileGate({ members, onSelect, onAddMember }) {
 function AddMemberForm({ onAdd, onCancel }) {
   const [name, setName] = useState('')
   const [color, setColor] = useState(COLOR_PRESETS[0])
+  const [photoFile, setPhotoFile] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(null)
   const [saving, setSaving] = useState(false)
+  const fileInputRef = useRef(null)
 
   const canSubmit = name.trim()
+
+  function handlePhotoChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
 
   async function submit() {
     if (!canSubmit) return
     setSaving(true)
     try {
-      await onAdd({ name: name.trim(), color })
+      await onAdd({ name: name.trim(), color, photoFile })
     } finally {
       setSaving(false)
     }
@@ -63,14 +73,29 @@ function AddMemberForm({ onAdd, onCancel }) {
 
   return (
     <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-4 space-y-3">
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && submit()}
-        placeholder="Ton prénom"
-        autoFocus
-        className="w-full px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
-      />
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="w-16 h-16 rounded-full bg-zinc-700 border border-dashed border-zinc-600 flex items-center justify-center overflow-hidden shrink-0"
+          aria-label="Choisir une photo"
+        >
+          {photoPreview ? (
+            <img src={photoPreview} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <Camera size={20} className="text-zinc-500" />
+          )}
+        </button>
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && submit()}
+          placeholder="Ton prénom"
+          autoFocus
+          className="flex-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+        />
+      </div>
       <div className="flex items-center gap-2">
         {COLOR_PRESETS.map((c) => (
           <button

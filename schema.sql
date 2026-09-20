@@ -324,3 +324,18 @@ alter table agenda_events rename column day_date to day;
 -- "1kg", "3 paquets" — texte libre plutôt que numérique pour rester
 -- flexible).
 alter table shopping_items add column if not exists quantity text;
+
+-- 2026-09-20 : photo de profil par membre. Stockée dans Supabase
+-- Storage (bucket "avatars", public en lecture) ; seule l'URL publique
+-- est gardée en base. Bucket public + policies "allow all" en écriture,
+-- comme le reste du projet (pas de vraie authentification).
+alter table members add column if not exists photo_url text;
+
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+create policy "allow all - avatars read" on storage.objects for select using (bucket_id = 'avatars');
+create policy "allow all - avatars write" on storage.objects for insert with check (bucket_id = 'avatars');
+create policy "allow all - avatars update" on storage.objects for update using (bucket_id = 'avatars');
+create policy "allow all - avatars delete" on storage.objects for delete using (bucket_id = 'avatars');

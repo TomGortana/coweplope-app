@@ -1,5 +1,6 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient'
 import * as mock from './mockData'
+import { resizeImageFile } from './resizeImage'
 
 // ============================================================
 // Couche d'accès aux données.
@@ -22,18 +23,18 @@ export async function getMembers() {
   return mock.members
 }
 
-export async function addMember({ name, avatar_emoji, color }) {
+export async function addMember({ name, avatar_emoji, color, photo_url }) {
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from('members')
-      .insert({ name, avatar_emoji: avatar_emoji || '🙂', color: color || '#6366f1' })
+      .insert({ name, avatar_emoji: avatar_emoji || '🙂', color: color || '#6366f1', photo_url: photo_url || null })
       .select()
       .single()
     if (error) throw error
     return data
   }
   await delay()
-  const m = { id: mock.nextId(), name, avatar_emoji: avatar_emoji || '🙂', color: color || '#6366f1' }
+  const m = { id: mock.nextId(), name, avatar_emoji: avatar_emoji || '🙂', color: color || '#6366f1', photo_url: photo_url || null }
   mock.members.push(m)
   return m
 }
@@ -47,6 +48,36 @@ export async function deleteMember(id) {
   await delay()
   const idx = mock.members.findIndex((m) => m.id === id)
   if (idx >= 0) mock.members.splice(idx, 1)
+}
+
+export async function updateMemberPhoto(id, photo_url) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase.from('members').update({ photo_url }).eq('id', id).select().single()
+    if (error) throw error
+    return data
+  }
+  await delay()
+  const m = mock.members.find((x) => x.id === id)
+  if (m) m.photo_url = photo_url
+  return m
+}
+
+// Redimensionne l'image puis l'envoie dans le bucket Storage "avatars"
+// (voir schema.sql) ; renvoie l'URL publique à stocker sur le membre.
+export async function uploadMemberPhoto(file) {
+  const resized = await resizeImageFile(file)
+  if (isSupabaseConfigured) {
+    const fileName = `${crypto.randomUUID()}.jpg`
+    const { error } = await supabase.storage.from('avatars').upload(fileName, resized, {
+      upsert: true,
+      contentType: 'image/jpeg',
+    })
+    if (error) throw error
+    const { data } = supabase.storage.from('avatars').getPublicUrl(fileName)
+    return data.publicUrl
+  }
+  await delay()
+  return URL.createObjectURL(resized)
 }
 
 // ---------- WEEKENDS ----------
