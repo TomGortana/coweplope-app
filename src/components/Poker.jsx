@@ -216,8 +216,16 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
   const [payouts, setPayouts] = useState(['', '', ''])
   const [saving, setSaving] = useState(false)
 
-  const canSubmit = date && variant.trim() && participantIds.size > 0
   const payoutCount = Math.min(3, participantIds.size)
+  const lastIdx = payoutCount - 1
+  const pot = (Number(buyIn) || 0) * participantIds.size
+  const enteredSum = payouts.slice(0, lastIdx).reduce((s, v) => s + (Number(v) || 0), 0)
+  // le dernier rang se déduit automatiquement pour que le total des
+  // gains corresponde toujours au pot (mise x nombre de participants)
+  const remainder = pot - enteredSum
+  const effectivePayouts = payoutCount > 0 ? payouts.map((v, i) => (i === lastIdx ? remainder : Number(v) || 0)) : []
+
+  const canSubmit = date && variant.trim() && participantIds.size > 0 && remainder >= 0
 
   function toggleParticipant(id) {
     setParticipantIds((prev) => {
@@ -241,9 +249,9 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
         variant: variant.trim(),
         buy_in: Number(buyIn) || 0,
         participant_ids: [...participantIds],
-        payout_1st: Number(payouts[0]) || 0,
-        payout_2nd: Number(payouts[1]) || 0,
-        payout_3rd: Number(payouts[2]) || 0,
+        payout_1st: effectivePayouts[0] || 0,
+        payout_2nd: effectivePayouts[1] || 0,
+        payout_3rd: effectivePayouts[2] || 0,
       })
       onClose()
     } finally {
@@ -312,22 +320,35 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
           </div>
           <div>
             <label className="text-xs text-zinc-500 font-medium">Gains du 1er / 2e / 3e (€)</label>
-            <p className="text-[11px] text-zinc-600 mb-1">Défini une fois pour toutes, les scores se saisiront juste en choisissant le classement.</p>
+            <p className="text-[11px] text-zinc-600 mb-1">
+              Pot total : {pot}€ ({participantIds.size} × {Number(buyIn) || 0}€) — le dernier rang se remplit tout seul pour que le total corresponde au pot.
+            </p>
             <div className="flex gap-2">
-              {RANK_LABELS.slice(0, payoutCount).map((label, i) => (
-                <div key={label} className="flex-1">
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    value={payouts[i]}
-                    onChange={(e) => updatePayout(i, e.target.value)}
-                    placeholder={label}
-                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-700 text-sm text-zinc-100 text-center outline-none focus:ring-2 focus:ring-amber-500"
-                  />
-                  <p className="text-[10px] text-zinc-600 text-center mt-0.5">{label}</p>
-                </div>
-              ))}
+              {RANK_LABELS.slice(0, payoutCount).map((label, i) => {
+                const isLast = i === lastIdx
+                return (
+                  <div key={label} className="flex-1">
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      value={isLast ? remainder : payouts[i]}
+                      onChange={(e) => !isLast && updatePayout(i, e.target.value)}
+                      readOnly={isLast}
+                      placeholder={label}
+                      className={`w-full px-3 py-2.5 rounded-xl text-sm text-center outline-none focus:ring-2 focus:ring-amber-500 ${
+                        isLast ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-700 text-zinc-100'
+                      } ${isLast && remainder < 0 ? 'text-rose-400' : ''}`}
+                    />
+                    <p className="text-[10px] text-zinc-600 text-center mt-0.5">{label}</p>
+                  </div>
+                )
+              })}
             </div>
+            {remainder < 0 && (
+              <p className="text-[11px] text-rose-400 mt-1">
+                Les gains saisis dépassent le pot de {-remainder}€ — réduis le 1er ou le 2e.
+              </p>
+            )}
           </div>
           <button
             onClick={submit}

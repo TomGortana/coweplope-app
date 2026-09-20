@@ -3,13 +3,24 @@ import { Plus, Trash2, X, Pencil } from 'lucide-react'
 import { useLockBodyScroll } from '../lib/useLockBodyScroll'
 import Avatar from './Avatar'
 
+// cur.toISOString() convertit en UTC : pour un fuseau en avance sur UTC
+// (ex: France), minuit local peut retomber sur la veille en UTC, ce qui
+// décale la date d'un jour. On reconstruit l'ISO depuis les composants
+// locaux pour éviter ce décalage.
+function toLocalISODate(d) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 function buildDays(weekend) {
   if (!weekend?.start_date || !weekend?.end_date) return []
   const days = []
   const cur = new Date(weekend.start_date + 'T00:00:00')
   const end = new Date(weekend.end_date + 'T00:00:00')
   while (cur <= end) {
-    const iso = cur.toISOString().slice(0, 10)
+    const iso = toLocalISODate(cur)
     const weekday = cur.toLocaleDateString('fr-FR', { weekday: 'long' })
     const shortDate = cur.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
     days.push({ key: iso, label: weekday.charAt(0).toUpperCase() + weekday.slice(1), shortDate })

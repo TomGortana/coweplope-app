@@ -16,6 +16,7 @@ import { buildNotifyLink } from './lib/whatsapp'
 import * as api from './lib/api'
 
 const WEEKEND_KEY = 'coweplope_current_weekend'
+const VALID_TABS = ['dashboard', 'lodging', 'agenda', 'shopping', 'widgets', 'poker']
 
 export default function App() {
   const [loading, setLoading] = useState(true)
@@ -29,7 +30,12 @@ export default function App() {
   const [currentMemberId, setCurrentMemberId] = useState('')
   const [currentWeekendId, setCurrentWeekendId] = useState(localStorage.getItem(WEEKEND_KEY) || '')
 
-  const [activeTab, setActiveTab] = useState('dashboard')
+  // Permet un lien direct vers un onglet (ex: .../#poker) depuis les
+  // messages WhatsApp de notification.
+  const [activeTab, setActiveTab] = useState(() => {
+    const hash = window.location.hash.replace('#', '')
+    return VALID_TABS.includes(hash) ? hash : 'dashboard'
+  })
   const [adminOpen, setAdminOpen] = useState(false)
   const [manageWeekendOpen, setManageWeekendOpen] = useState(false)
   const [toast, setToast] = useState(null)
@@ -108,13 +114,17 @@ export default function App() {
 
   const actorTag = () => `[${currentMember?.name}]`
   const APP_NAME = 'Coweplope Organizer'
+  const SITE_URL = 'https://coweplope-app.vercel.app'
 
   // ---------- Handlers ----------
   async function handleCreateWeekend({ name, start_date, end_date }) {
     const w = await api.createWeekend({ name, start_date, end_date })
     setWeekends((prev) => [w, ...prev])
     setCurrentWeekendId(w.id)
-    notify(`Édition "${name}" créée.`, `${actorTag()} a créé une nouvelle édition : ${name} sur ${APP_NAME} !`)
+    notify(
+      `Édition "${name}" créée.`,
+      `📅 ${actorTag()} a créé une nouvelle édition : ${name} sur ${APP_NAME} !\n${SITE_URL}`
+    )
   }
 
   async function handleSaveWeekendSettings(weekendId, { name, start_date, end_date, absentMemberIds: newAbsentIds }) {
@@ -162,7 +172,10 @@ export default function App() {
   async function handleAddLodging(data) {
     await api.addLodgingProposal(currentWeekend.id, { ...data, created_by: currentMember.id })
     await reloadWeekendData()
-    notify('Logement proposé !', `${actorTag()} a proposé un logement : "${data.title}" sur ${APP_NAME} !`)
+    notify(
+      'Logement proposé !',
+      `🏠 ${actorTag()} a proposé un logement : "${data.title}" sur ${APP_NAME} !\nVoter : ${SITE_URL}/#lodging`
+    )
   }
 
   async function handleEditLodging(proposalId, data) {
@@ -184,7 +197,10 @@ export default function App() {
     const p = lodging.proposals.find((x) => x.id === proposalId)
     await api.validateLodging(currentWeekend.id, proposalId)
     await reloadWeekendData()
-    notify('Logement validé ✅', `${actorTag()} a validé le logement "${p?.title}" sur ${APP_NAME} !`)
+    notify(
+      'Logement validé ✅',
+      `✅ ${actorTag()} a validé le logement "${p?.title}" sur ${APP_NAME} !\nVoir : ${SITE_URL}/#lodging`
+    )
   }
 
   async function handleDeleteLodging(proposalId) {
@@ -200,7 +216,10 @@ export default function App() {
   async function handleAddAgendaEvent(data) {
     await api.addAgendaEvent(currentWeekend.id, { ...data, responsible_id: data.responsible_id || null })
     await reloadWeekendData()
-    notify('Activité ajoutée !', `${actorTag()} a ajouté une activité "${data.title}" sur ${APP_NAME} !`)
+    notify(
+      'Activité ajoutée !',
+      `🗓️ ${actorTag()} a ajouté une activité "${data.title}" sur ${APP_NAME} !\nVoir l'agenda : ${SITE_URL}/#agenda`
+    )
   }
 
   async function handleEditAgendaEvent(id, data) {
@@ -247,7 +266,10 @@ export default function App() {
   async function handleAddPokerGame(data) {
     await api.addPokerGame(currentWeekend.id, data)
     await reloadWeekendData()
-    notify('Partie créée ! Saisis les scores.', `${actorTag()} a lancé une partie de poker sur ${APP_NAME} !`)
+    notify(
+      'Partie créée ! Saisis les scores.',
+      `🃏 ${actorTag()} a lancé une partie de poker sur ${APP_NAME} !\nSaisir les scores : ${SITE_URL}/#poker`
+    )
   }
 
   async function handleSetPokerResult(gameId, memberId, value) {
