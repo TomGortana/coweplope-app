@@ -98,41 +98,48 @@ function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, onE
   }
 
   return (
-    <div className="bg-zinc-700 border border-zinc-600 rounded-xl p-3 flex items-center gap-3">
+    <div className="bg-zinc-700 border border-zinc-600 rounded-xl p-3 flex items-start gap-3">
       <button
         onClick={() => !isArchived && onToggle(item.id, !item.bought)}
         disabled={isArchived}
-        className={`w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center transition ${
+        className={`w-6 h-6 mt-0.5 shrink-0 rounded-lg border-2 flex items-center justify-center transition ${
           item.bought ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-500'
         }`}
       >
         {item.bought && <Check size={14} className="text-white" strokeWidth={3} />}
       </button>
-      <p className={`flex-1 min-w-0 text-sm text-zinc-200 truncate ${item.bought ? 'line-through text-zinc-500' : ''}`}>
-        {item.label}
-      </p>
-      {!isArchived &&
-        (assignee ? (
-          <span className="text-xs font-medium text-zinc-400 shrink-0 flex items-center gap-1">
-            <Avatar member={assignee} size="sm" /> {assignee.name}
-          </span>
-        ) : (
-          <button
-            onClick={() => onAssign(item.id, currentMember.id)}
-            className="shrink-0 flex items-center gap-1 text-xs font-semibold text-copper-400 border border-copper-800 rounded-lg px-2 py-1 active:bg-copper-500/10"
-          >
-            <User size={12} /> Je m'en occupe
+
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm text-zinc-200 break-words ${item.bought ? 'line-through text-zinc-500' : ''}`}>
+          {item.label}
+        </p>
+        {!isArchived && (
+          <div className="mt-1.5">
+            {assignee ? (
+              <span className="text-xs font-medium text-zinc-400 flex items-center gap-1">
+                <Avatar member={assignee} size="sm" /> {assignee.name}
+              </span>
+            ) : (
+              <button
+                onClick={() => onAssign(item.id, currentMember.id)}
+                className="flex items-center gap-1 text-xs font-semibold text-copper-400 border border-copper-800 rounded-lg px-2 py-1 active:bg-copper-500/10"
+              >
+                <User size={12} /> Je m'en occupe
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {!isArchived && (
+        <div className="flex items-center gap-1 shrink-0">
+          <button onClick={onEdit} className="text-zinc-600 active:text-copper-400 p-1">
+            <Pencil size={16} />
           </button>
-        ))}
-      {!isArchived && (
-        <button onClick={onEdit} className="text-zinc-600 active:text-copper-400 p-1 shrink-0">
-          <Pencil size={16} />
-        </button>
-      )}
-      {!isArchived && (
-        <button onClick={handleDelete} className="text-zinc-600 active:text-rose-500 p-1 shrink-0">
-          <Trash2 size={16} />
-        </button>
+          <button onClick={handleDelete} className="text-zinc-600 active:text-rose-500 p-1">
+            <Trash2 size={16} />
+          </button>
+        </div>
       )}
     </div>
   )
