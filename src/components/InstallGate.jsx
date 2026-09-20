@@ -20,24 +20,22 @@ export default function InstallGate({ onContinue }) {
       <div className="w-full max-w-sm">
         <img src="/logo.png" alt="Coweplope" className="w-32 h-32 mx-auto mb-5" />
         <p className="flex items-center justify-center gap-1.5 text-amber-400 text-xs font-semibold uppercase tracking-wide mb-2">
-          <Sparkles size={14} /> Quelque chose arrive
+          <Sparkles size={14} /> Le Coweplope a désormais son appli
         </p>
         <h1 className="text-xl font-bold text-zinc-100 mb-2">Coweplope Organizer</h1>
-        <p className="text-sm text-zinc-400 mb-6">
-          Installe cette page sur ton écran d'accueil pour découvrir l'appli du prochain week-end.
-        </p>
+        <p className="text-sm text-zinc-400 mb-6">Installe-la sur ton smartphone en suivant les instructions ci-dessous.</p>
 
         <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-4 text-left space-y-3">
           {platform === 'ios' && (
             <>
               <Step icon={Share} text={<>Appuie sur <strong className="text-zinc-200">Partager</strong> en bas de Safari</>} />
-              <Step n="2" text={<>Choisis <strong className="text-zinc-200">"Sur l'écran d'accueil"</strong></>} />
+              <Step n="2" text={<>Tape sur <strong className="text-zinc-200">"Ajouter à l'écran d'accueil"</strong></>} />
             </>
           )}
           {platform === 'android' && (
             <>
               <Step icon={MoreVertical} text={<>Appuie sur <strong className="text-zinc-200">⋮</strong> en haut à droite de Chrome</>} />
-              <Step n="2" text={<>Choisis <strong className="text-zinc-200">"Installer l'application"</strong></>} />
+              <Step n="2" text={<>Clique sur <strong className="text-zinc-200">"Installer et créer un raccourci"</strong></>} />
             </>
           )}
           {platform === 'other' && (
