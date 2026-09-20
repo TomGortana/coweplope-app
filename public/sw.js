@@ -6,7 +6,17 @@
 // resservirait indéfiniment une vieille réponse (y compris une erreur)
 // au lieu d'aller chercher les données à jour. On se limite donc
 // strictement aux requêtes vers le même domaine que l'app (self.location.origin).
-const CACHE = 'coweplope-v2'
+//
+// Stratégie de cache différenciée :
+// - fichiers /assets/* (nom avec hash de contenu, ex: index-abc123.js) :
+//   cache-first — un hash donné ne change jamais de contenu, donc c'est
+//   sans risque et plus rapide.
+// - tout le reste (index.html, /, manifest.json...) : network-first — on
+//   essaie toujours le réseau en premier pour voir la dernière version
+//   déployée, et on ne retombe sur le cache qu'hors-ligne. Sans ça, un
+//   nouveau déploiement ne serait jamais visible pour un visiteur qui a
+//   déjà mis l'app en cache.
+const CACHE = 'coweplope-v3'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -27,17 +37,25 @@ self.addEventListener('fetch', (event) => {
   // Ne jamais intercepter les requêtes vers un autre domaine (Supabase, etc.)
   if (url.origin !== self.location.origin) return
 
+  const isHashedAsset = url.pathname.startsWith('/assets/')
+
   event.respondWith(
-    caches.match(request).then(
-      (cached) =>
-        cached ||
-        fetch(request)
+    isHashedAsset
+      ? caches.match(request).then(
+          (cached) =>
+            cached ||
+            fetch(request).then((response) => {
+              const copy = response.clone()
+              caches.open(CACHE).then((cache) => cache.put(request, copy))
+              return response
+            })
+        )
+      : fetch(request)
           .then((response) => {
             const copy = response.clone()
             caches.open(CACHE).then((cache) => cache.put(request, copy))
             return response
           })
-          .catch(() => cached)
-    )
+          .catch(() => caches.match(request))
   )
 })
