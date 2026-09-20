@@ -8,7 +8,8 @@ body {
   margin: 0;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: contain;
-  background-color: #f8fafc;
+  background-color: #18181b;
+  color-scheme: dark;
 }
 
 /* Cache la scrollbar sur mobile pour un rendu plus propre */

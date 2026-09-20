@@ -11,7 +11,7 @@ const TABS = [
 
 export default function BottomNav({ active, onChange }) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-800 border-t border-zinc-700 pb-[env(safe-area-inset-bottom)]">
       <div className="grid grid-cols-6">
         {TABS.map(({ key, label, icon: Icon }) => {
           const isActive = active === key
@@ -19,8 +19,8 @@ export default function BottomNav({ active, onChange }) {
             <button
               key={key}
               onClick={() => onChange(key)}
-              className={`flex flex-col items-center justify-center gap-1 py-2.5 active:bg-slate-50 transition ${
-                isActive ? 'text-indigo-600' : 'text-slate-400'
+              className={`flex flex-col items-center justify-center gap-1 py-2.5 active:bg-zinc-700 transition ${
+                isActive ? 'text-amber-400' : 'text-zinc-500'
               }`}
             >
               <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />

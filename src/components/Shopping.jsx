@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Plus, Check, User, Trash2 } from 'lucide-react'
+import Avatar from './Avatar'
 
 export default function Shopping({ items, membersById, currentMember, onAdd, onToggle, onAssign, onDelete, isArchived }) {
   const [text, setText] = useState('')
@@ -18,7 +19,7 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onT
 
   return (
     <div className="px-4 pt-4 pb-6 space-y-4">
-      <h1 className="text-lg font-bold text-slate-900">Liste de courses</h1>
+      <h1 className="text-lg font-bold text-zinc-100">Liste de courses</h1>
 
       {!isArchived && (
         <div className="flex gap-2">
@@ -27,18 +28,18 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onT
             onChange={(e) => setQty(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && submit()}
             placeholder="Qté"
-            className="w-16 px-2 py-3 rounded-xl bg-slate-100 text-sm text-center outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-16 px-2 py-3 rounded-xl bg-zinc-800 text-sm text-zinc-100 text-center outline-none focus:ring-2 focus:ring-amber-500"
           />
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && submit()}
             placeholder="Ajouter un article..."
-            className="flex-1 px-4 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+            className="flex-1 px-4 py-3 rounded-xl bg-zinc-800 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
           />
           <button
             onClick={submit}
-            className="w-12 h-12 shrink-0 flex items-center justify-center rounded-xl bg-indigo-600 text-white active:scale-95 transition"
+            className="w-12 h-12 shrink-0 flex items-center justify-center rounded-xl bg-amber-500 text-zinc-950 active:scale-95 transition"
           >
             <Plus size={20} />
           </button>
@@ -62,7 +63,7 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onT
 
       {done.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Acheté ({done.length})</p>
+          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">Acheté ({done.length})</p>
           <div className="space-y-2 opacity-60">
             {done.map((item) => (
               <ShoppingRow
@@ -80,7 +81,7 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onT
         </div>
       )}
 
-      {items.length === 0 && <p className="text-sm text-slate-400 py-8 text-center">Liste vide pour l'instant.</p>}
+      {items.length === 0 && <p className="text-sm text-zinc-500 py-8 text-center">Liste vide pour l'instant.</p>}
     </div>
   )
 }
@@ -95,35 +96,35 @@ function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, onD
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-3 flex items-center gap-3">
+    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 flex items-center gap-3">
       <button
         onClick={() => !isArchived && onToggle(item.id, !item.bought)}
         disabled={isArchived}
         className={`w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center transition ${
-          item.bought ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300'
+          item.bought ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-600'
         }`}
       >
         {item.bought && <Check size={14} className="text-white" strokeWidth={3} />}
       </button>
-      <p className={`flex-1 text-sm text-slate-800 ${item.bought ? 'line-through text-slate-400' : ''}`}>
-        {item.quantity && <span className="text-slate-400 font-semibold mr-1.5">{item.quantity}</span>}
+      <p className={`flex-1 text-sm text-zinc-200 ${item.bought ? 'line-through text-zinc-500' : ''}`}>
+        {item.quantity && <span className="text-zinc-500 font-semibold mr-1.5">{item.quantity}</span>}
         {item.label}
       </p>
       {!isArchived &&
         (assignee ? (
-          <span className="text-xs font-medium text-slate-500 shrink-0 flex items-center gap-1">
-            {assignee.avatar_emoji} {assignee.name}
+          <span className="text-xs font-medium text-zinc-400 shrink-0 flex items-center gap-1">
+            <Avatar member={assignee} size="sm" /> {assignee.name}
           </span>
         ) : (
           <button
             onClick={() => onAssign(item.id, currentMember.id)}
-            className="shrink-0 flex items-center gap-1 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-lg px-2 py-1 active:bg-indigo-50"
+            className="shrink-0 flex items-center gap-1 text-xs font-semibold text-amber-400 border border-amber-800 rounded-lg px-2 py-1 active:bg-amber-500/10"
           >
             <User size={12} /> Je m'en occupe
           </button>
         ))}
       {!isArchived && (
-        <button onClick={handleDelete} className="text-slate-300 active:text-rose-500 p-1 shrink-0">
+        <button onClick={handleDelete} className="text-zinc-600 active:text-rose-500 p-1 shrink-0">
           <Trash2 size={16} />
         </button>
       )}

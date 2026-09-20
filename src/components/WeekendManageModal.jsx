@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { useLockBodyScroll } from '../lib/useLockBodyScroll'
+import Avatar from './Avatar'
 
 export default function WeekendManageModal({ weekend, members, absentMemberIds, onClose, onSave, onDelete }) {
   useLockBodyScroll()
@@ -52,46 +53,46 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-end">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full bg-white rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] max-h-[85vh] overflow-y-auto">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="relative w-full bg-zinc-800 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-900">Modifier l'édition</h2>
-          <button onClick={onClose} className="p-1 text-slate-400 active:text-slate-700">
+          <h2 className="text-lg font-bold text-zinc-100">Modifier l'édition</h2>
+          <button onClick={onClose} className="p-1 text-zinc-500 active:text-zinc-200">
             <X size={22} />
           </button>
         </div>
         <div className="space-y-3">
           <div>
-            <label className="text-xs text-slate-400 font-medium">Nom</label>
+            <label className="text-xs text-zinc-500 font-medium">Nom</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full mt-1 px-4 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="text-xs text-slate-400 font-medium">Début</label>
+              <label className="text-xs text-zinc-500 font-medium">Début</label>
               <input
                 type="date"
                 value={start}
                 onChange={(e) => setStart(e.target.value)}
-                className="w-full mt-1 px-3 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full mt-1 px-3 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <div className="flex-1">
-              <label className="text-xs text-slate-400 font-medium">Fin</label>
+              <label className="text-xs text-zinc-500 font-medium">Fin</label>
               <input
                 type="date"
                 value={end}
                 onChange={(e) => setEnd(e.target.value)}
-                className="w-full mt-1 px-3 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full mt-1 px-3 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs text-slate-400 font-medium">Qui est présent sur cette édition ?</label>
+            <label className="text-xs text-zinc-500 font-medium">Qui est présent sur cette édition ?</label>
             <div className="grid grid-cols-2 gap-2 mt-1.5">
               {members.map((m) => {
                 const isAbsent = absent.has(m.id)
@@ -100,10 +101,10 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
                     key={m.id}
                     onClick={() => toggle(m.id)}
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium text-left ${
-                      isAbsent ? 'border-slate-200 text-slate-400 bg-slate-50' : 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                      isAbsent ? 'border-zinc-600 text-zinc-500 bg-zinc-700' : 'border-emerald-700 bg-emerald-500/10 text-emerald-300'
                     }`}
                   >
-                    <span>{m.avatar_emoji}</span>
+                    <Avatar member={m} size="sm" />
                     <span className="truncate flex-1">{m.name}</span>
                     <span className="text-[10px] font-semibold shrink-0">{isAbsent ? 'Absent' : 'Présent'}</span>
                   </button>
@@ -112,21 +113,22 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
             </div>
           </div>
 
-          <button
-            onClick={submit}
-            disabled={!canSubmit || saving}
-            className="w-full bg-indigo-600 disabled:bg-slate-300 text-white font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
-          >
-            {saving ? 'Enregistrement…' : 'Enregistrer'}
-          </button>
-
-          <button
-            onClick={remove}
-            disabled={deleting}
-            className="w-full text-center text-xs font-semibold text-rose-500 py-2 active:opacity-70 disabled:opacity-50"
-          >
-            {deleting ? 'Suppression…' : 'Supprimer cette édition'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={remove}
+              disabled={deleting}
+              className="flex-1 bg-rose-600 disabled:bg-zinc-600 text-white font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
+            >
+              {deleting ? 'Suppression…' : 'Supprimer'}
+            </button>
+            <button
+              onClick={submit}
+              disabled={!canSubmit || saving}
+              className="flex-1 bg-amber-500 disabled:bg-zinc-600 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
+            >
+              {saving ? 'Enregistrement…' : 'Enregistrer'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

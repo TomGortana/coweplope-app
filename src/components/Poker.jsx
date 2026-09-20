@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus, Trophy, X, Trash2 } from 'lucide-react'
 import { useLockBodyScroll } from '../lib/useLockBodyScroll'
+import Avatar from './Avatar'
 
 const RANK_LABELS = ['1er', '2e', '3e']
 
@@ -11,27 +12,26 @@ export default function Poker({ poker, membersById, members, absentMemberIds, on
   return (
     <div className="px-4 pt-4 pb-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold text-slate-900">Poker</h1>
+        <h1 className="text-lg font-bold text-zinc-100">Poker</h1>
         {!isArchived && (
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-1 text-xs font-semibold text-indigo-600 active:opacity-70">
+          <button onClick={() => setShowForm(true)} className="flex items-center gap-1 text-xs font-semibold text-amber-400 active:opacity-70">
             <Plus size={14} /> Nouvelle partie
           </button>
         )}
       </div>
 
       {leaderboard.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-3.5">
-          <p className="text-xs font-semibold text-slate-400 mb-2 flex items-center gap-1">
-            <Trophy size={13} className="text-amber-500" /> Classement général
+        <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-3.5">
+          <p className="text-xs font-semibold text-zinc-500 mb-2 flex items-center gap-1">
+            <Trophy size={13} className="text-amber-400" /> Classement général
           </p>
           <div className="space-y-1.5">
             {leaderboard.map((e, i) => (
               <div key={e.member_id} className="flex items-center gap-2 text-sm">
-                <span className="w-4 text-slate-300 font-semibold">{i + 1}</span>
-                <span className="flex-1 text-slate-700">
-                  {e.member.avatar_emoji} {e.member.name}
-                </span>
-                <span className={`font-bold ${e.total >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                <span className="w-4 text-zinc-600 font-semibold">{i + 1}</span>
+                <Avatar member={e.member} size="sm" />
+                <span className="flex-1 text-zinc-300">{e.member.name}</span>
+                <span className={`font-bold ${e.total >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {e.total >= 0 ? '+' : ''}
                   {e.total} €
                 </span>
@@ -55,7 +55,7 @@ export default function Poker({ poker, membersById, members, absentMemberIds, on
         ))}
       </div>
 
-      {poker.games.length === 0 && <p className="text-sm text-slate-400 py-8 text-center">Aucune partie pour l'instant.</p>}
+      {poker.games.length === 0 && <p className="text-sm text-zinc-500 py-8 text-center">Aucune partie pour l'instant.</p>}
 
       {showForm && (
         <GameForm
@@ -74,20 +74,20 @@ function GameCard({ game, results, membersById, onSetResult, onDeleteGame, isArc
   const participants = results.map((r) => membersById[r.member_id]).filter(Boolean)
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-3.5">
+    <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-3.5">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-slate-800">{game.variant}</p>
-          <p className="text-xs text-slate-400">
+          <p className="text-sm font-semibold text-zinc-200">{game.variant}</p>
+          <p className="text-xs text-zinc-500">
             {new Date(game.game_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} · Cave {game.buy_in} €
           </p>
-          <p className="text-[11px] text-slate-300">
+          <p className="text-[11px] text-zinc-600">
             Barème : 1er +{game.payout_1st ?? 0}€ · 2e +{game.payout_2nd ?? 0}€ · 3e +{game.payout_3rd ?? 0}€
           </p>
         </div>
         {!isArchived && (
           <div className="flex items-center gap-2">
-            <button onClick={() => setEditing((e) => !e)} className="text-xs font-semibold text-indigo-600 active:opacity-70">
+            <button onClick={() => setEditing((e) => !e)} className="text-xs font-semibold text-amber-400 active:opacity-70">
               {editing ? 'Fermer' : 'Scores'}
             </button>
             <button
@@ -96,7 +96,7 @@ function GameCard({ game, results, membersById, onSetResult, onDeleteGame, isArc
                   onDeleteGame(game.id)
                 }
               }}
-              className="text-slate-300 active:text-rose-500 p-1"
+              className="text-zinc-600 active:text-rose-500 p-1"
             >
               <Trash2 size={16} />
             </button>
@@ -113,17 +113,17 @@ function GameCard({ game, results, membersById, onSetResult, onDeleteGame, isArc
             const value = r?.net_result ?? 0
             return (
               <div key={m.id} className="flex items-center justify-between text-sm py-0.5">
-                <span className="text-slate-600">
-                  {m.avatar_emoji} {m.name}
+                <span className="text-zinc-400 flex items-center gap-1.5">
+                  <Avatar member={m} size="sm" /> {m.name}
                 </span>
-                <span className={`font-semibold ${value > 0 ? 'text-emerald-600' : value < 0 ? 'text-rose-600' : 'text-slate-300'}`}>
+                <span className={`font-semibold ${value > 0 ? 'text-emerald-400' : value < 0 ? 'text-rose-400' : 'text-zinc-600'}`}>
                   {value > 0 ? '+' : ''}
                   {value} €
                 </span>
               </div>
             )
           })}
-          {participants.length === 0 && <p className="text-xs text-slate-300 mt-2">Aucun participant sélectionné.</p>}
+          {participants.length === 0 && <p className="text-xs text-zinc-600 mt-2">Aucun participant sélectionné.</p>}
         </div>
       )}
     </div>
@@ -172,17 +172,17 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
   }
 
   return (
-    <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
+    <div className="mt-3 pt-3 border-t border-zinc-700 space-y-2">
       {ranking.map((memberId, i) => (
         <div key={i} className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400 w-20 shrink-0">
+          <span className="text-xs font-semibold text-zinc-500 w-20 shrink-0">
             {RANK_LABELS[i]} ({payouts[i] - buyIn >= 0 ? '+' : ''}
             {payouts[i] - buyIn}€)
           </span>
           <select
             value={memberId}
             onChange={(e) => updateRank(i, e.target.value)}
-            className="flex-1 px-2 py-2 rounded-lg bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+            className="flex-1 px-2 py-2 rounded-lg bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
           >
             <option value="">—</option>
             {optionsFor(i).map((m) => (
@@ -193,11 +193,11 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
           </select>
         </div>
       ))}
-      <p className="text-[11px] text-slate-300">Les autres joueurs perdent leur mise ({-buyIn}€).</p>
+      <p className="text-[11px] text-zinc-600">Les autres joueurs perdent leur mise ({-buyIn}€).</p>
       <button
         onClick={save}
         disabled={saving}
-        className="w-full bg-slate-900 disabled:bg-slate-300 text-white text-sm font-semibold py-2.5 rounded-xl active:scale-[0.98] transition"
+        className="w-full bg-zinc-100 disabled:bg-zinc-600 text-zinc-900 text-sm font-semibold py-2.5 rounded-xl active:scale-[0.98] transition"
       >
         {saving ? 'Enregistrement…' : 'Valider le classement'}
       </button>
@@ -253,45 +253,45 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full bg-white rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] max-h-[85vh] overflow-y-auto">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="relative w-full bg-zinc-800 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-900">Nouvelle partie</h2>
-          <button onClick={onClose} className="p-1 text-slate-400 active:text-slate-700">
+          <h2 className="text-lg font-bold text-zinc-100">Nouvelle partie</h2>
+          <button onClick={onClose} className="p-1 text-zinc-500 active:text-zinc-200">
             <X size={22} />
           </button>
         </div>
         <div className="space-y-3">
           <div>
-            <label className="text-xs text-slate-400 font-medium">Date</label>
+            <label className="text-xs text-zinc-500 font-medium">Date</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full mt-1 px-4 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-400 font-medium">Variante</label>
+            <label className="text-xs text-zinc-500 font-medium">Variante</label>
             <input
               value={variant}
               onChange={(e) => setVariant(e.target.value)}
               placeholder="Ex: Texas Hold'em"
-              className="w-full mt-1 px-4 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-400 font-medium">Cave / buy-in par joueur (€)</label>
+            <label className="text-xs text-zinc-500 font-medium">Cave / buy-in par joueur (€)</label>
             <input
               type="number"
               inputMode="decimal"
               value={buyIn}
               onChange={(e) => setBuyIn(e.target.value)}
-              className="w-full mt-1 px-4 py-3 rounded-xl bg-slate-100 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-400 font-medium">Qui joue ?</label>
+            <label className="text-xs text-zinc-500 font-medium">Qui joue ?</label>
             <div className="grid grid-cols-2 gap-2 mt-1.5">
               {members.map((m) => {
                 const checked = participantIds.has(m.id)
@@ -300,10 +300,10 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
                     key={m.id}
                     onClick={() => toggleParticipant(m.id)}
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium text-left ${
-                      checked ? 'border-indigo-300 bg-indigo-50 text-indigo-700' : 'border-slate-200 text-slate-400'
+                      checked ? 'border-amber-700 bg-amber-500/10 text-amber-300' : 'border-zinc-600 text-zinc-500'
                     }`}
                   >
-                    <span>{m.avatar_emoji}</span>
+                    <Avatar member={m} size="sm" />
                     <span className="truncate">{m.name}</span>
                   </button>
                 )
@@ -311,8 +311,8 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
             </div>
           </div>
           <div>
-            <label className="text-xs text-slate-400 font-medium">Gains du 1er / 2e / 3e (€)</label>
-            <p className="text-[11px] text-slate-300 mb-1">Défini une fois pour toutes, les scores se saisiront juste en choisissant le classement.</p>
+            <label className="text-xs text-zinc-500 font-medium">Gains du 1er / 2e / 3e (€)</label>
+            <p className="text-[11px] text-zinc-600 mb-1">Défini une fois pour toutes, les scores se saisiront juste en choisissant le classement.</p>
             <div className="flex gap-2">
               {RANK_LABELS.slice(0, payoutCount).map((label, i) => (
                 <div key={label} className="flex-1">
@@ -322,9 +322,9 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
                     value={payouts[i]}
                     onChange={(e) => updatePayout(i, e.target.value)}
                     placeholder={label}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-100 text-sm text-center outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2.5 rounded-xl bg-zinc-700 text-sm text-zinc-100 text-center outline-none focus:ring-2 focus:ring-amber-500"
                   />
-                  <p className="text-[10px] text-slate-300 text-center mt-0.5">{label}</p>
+                  <p className="text-[10px] text-zinc-600 text-center mt-0.5">{label}</p>
                 </div>
               ))}
             </div>
@@ -332,7 +332,7 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
           <button
             onClick={submit}
             disabled={!canSubmit || saving}
-            className="w-full bg-indigo-600 disabled:bg-slate-300 text-white font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
+            className="w-full bg-amber-500 disabled:bg-zinc-600 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
           >
             {saving ? 'Création…' : 'Créer la partie'}
           </button>

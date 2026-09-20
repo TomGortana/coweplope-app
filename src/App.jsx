@@ -8,6 +8,8 @@ import Shopping from './components/Shopping'
 import Widgets from './components/Widgets'
 import Poker from './components/Poker'
 import AdminModal from './components/AdminModal'
+import WeekendManageModal from './components/WeekendManageModal'
+import ProfileGate from './components/ProfileGate'
 import Toast from './components/Toast'
 import { isSupabaseConfigured } from './lib/supabaseClient'
 import { buildNotifyLink } from './lib/whatsapp'
@@ -27,6 +29,7 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('dashboard')
   const [adminOpen, setAdminOpen] = useState(false)
+  const [manageWeekendOpen, setManageWeekendOpen] = useState(false)
   const [toast, setToast] = useState(null)
 
   // Données de l'édition sélectionnée
@@ -51,7 +54,6 @@ export default function App() {
         if (cancelled) return
         setMembers(m)
         setWeekends(w)
-        if (!currentMemberId && m[0]) setCurrentMemberId(m[0].id)
         if ((!currentWeekendId || !w.find((x) => x.id === currentWeekendId)) && w[0]) {
           const active = w.find((x) => x.status === 'active') || w[0]
           setCurrentWeekendId(active.id)
@@ -146,6 +148,12 @@ export default function App() {
     if (currentMemberId === id) setCurrentMemberId('')
   }
 
+  async function handleAddMemberAndSelect(data) {
+    const m = await api.addMember(data)
+    setMembers((prev) => [...prev, m])
+    setCurrentMemberId(m.id)
+  }
+
   async function handleAddLodging(data) {
     await api.addLodgingProposal(currentWeekend.id, { ...data, created_by: currentMember.id })
     await reloadWeekendData()
@@ -234,22 +242,26 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center text-slate-400 text-sm">Chargement…</div>
+      <div className="h-screen flex items-center justify-center bg-zinc-900 text-zinc-500 text-sm">Chargement…</div>
     )
   }
 
   if (error) {
     return (
-      <div className="h-screen flex items-center justify-center px-6 text-center">
-        <p className="text-sm text-rose-500">{error}</p>
+      <div className="h-screen flex items-center justify-center px-6 text-center bg-zinc-900">
+        <p className="text-sm text-rose-400">{error}</p>
       </div>
     )
   }
 
+  if (!currentMemberId) {
+    return <ProfileGate members={members} onSelect={setCurrentMemberId} onAddMember={handleAddMemberAndSelect} />
+  }
+
   return (
-    <div className="min-h-screen max-w-md mx-auto bg-slate-50 relative">
+    <div className="min-h-screen max-w-md mx-auto bg-zinc-900 relative">
       {!isSupabaseConfigured && (
-        <div className="bg-amber-100 text-amber-800 text-[11px] text-center py-1.5 px-3 font-medium">
+        <div className="bg-amber-500/10 text-amber-400 text-[11px] text-center py-1.5 px-3 font-medium">
           Mode démo (données simulées) — configure .env pour connecter Supabase
         </div>
       )}
@@ -262,9 +274,7 @@ export default function App() {
         currentWeekend={currentWeekend}
         onChangeWeekend={setCurrentWeekendId}
         onOpenAdmin={() => setAdminOpen(true)}
-        absentMemberIds={absentMemberIds}
-        onSaveWeekendSettings={handleSaveWeekendSettings}
-        onDeleteWeekend={handleDeleteWeekend}
+        onOpenManageWeekend={() => setManageWeekendOpen(true)}
       />
 
       <main className="pb-24">
@@ -349,6 +359,17 @@ export default function App() {
           members={members}
           onAddMember={handleAddMember}
           onDeleteMember={handleDeleteMember}
+        />
+      )}
+
+      {manageWeekendOpen && currentWeekend && (
+        <WeekendManageModal
+          weekend={currentWeekend}
+          members={members}
+          absentMemberIds={absentMemberIds}
+          onClose={() => setManageWeekendOpen(false)}
+          onSave={handleSaveWeekendSettings}
+          onDelete={handleDeleteWeekend}
         />
       )}
     </div>
