@@ -1,6 +1,6 @@
 import { Home, CalendarDays, ShoppingCart, Trophy, Wallet } from 'lucide-react'
 
-export default function Dashboard({ currentMember, weekend, lodging, agenda, shopping, poker, balance, onNavigate }) {
+export default function Dashboard({ currentMember, weekend, lodging, agenda, shopping, poker, onNavigate }) {
   const pendingLodging = lodging.filter((p) => p.status === 'proposed').length
   const validated = lodging.find((p) => p.status === 'validated')
   const nextEvent = agenda[0]
@@ -59,11 +59,8 @@ export default function Dashboard({ currentMember, weekend, lodging, agenda, sho
           </p>
         </Card>
 
-        <Card icon={Wallet} color="rose" title="Mon solde" onClick={() => onNavigate('widgets')}>
-          <p className={`text-sm font-semibold ${balance >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-            {balance >= 0 ? '+' : ''}
-            {balance?.toFixed(2)} €
-          </p>
+        <Card icon={Wallet} color="rose" title="Dépenses" onClick={() => onNavigate('widgets')}>
+          <p className="text-sm text-slate-600">Ouvrir Tricount</p>
         </Card>
       </div>
 

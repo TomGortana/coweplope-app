@@ -3,14 +3,17 @@ import { Plus, Check, User, Trash2 } from 'lucide-react'
 
 export default function Shopping({ items, membersById, currentMember, onAdd, onToggle, onAssign, onDelete, isArchived }) {
   const [text, setText] = useState('')
+  const [qty, setQty] = useState('')
   const todo = items.filter((i) => !i.bought)
   const done = items.filter((i) => i.bought)
 
   async function submit() {
     if (!text.trim()) return
     const value = text.trim()
+    const quantity = qty.trim()
     setText('')
-    await onAdd(value)
+    setQty('')
+    await onAdd(value, quantity)
   }
 
   return (
@@ -19,6 +22,13 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onT
 
       {!isArchived && (
         <div className="flex gap-2">
+          <input
+            value={qty}
+            onChange={(e) => setQty(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && submit()}
+            placeholder="Qté"
+            className="w-16 px-2 py-3 rounded-xl bg-slate-100 text-sm text-center outline-none focus:ring-2 focus:ring-indigo-500"
+          />
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -95,7 +105,10 @@ function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, onD
       >
         {item.bought && <Check size={14} className="text-white" strokeWidth={3} />}
       </button>
-      <p className={`flex-1 text-sm text-slate-800 ${item.bought ? 'line-through text-slate-400' : ''}`}>{item.label}</p>
+      <p className={`flex-1 text-sm text-slate-800 ${item.bought ? 'line-through text-slate-400' : ''}`}>
+        {item.quantity && <span className="text-slate-400 font-semibold mr-1.5">{item.quantity}</span>}
+        {item.label}
+      </p>
       {!isArchived &&
         (assignee ? (
           <span className="text-xs font-medium text-slate-500 shrink-0 flex items-center gap-1">

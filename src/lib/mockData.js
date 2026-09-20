@@ -70,15 +70,3 @@ export const weekendAbsences = []
 export const tricountLinks = [
   { id: 't1', weekend_id: 'w1', url: 'https://tricount.com/xxxxx' },
 ]
-
-// Simulation de soldes Tricount (le vrai Tricount n'a pas d'API publique
-// ouverte à des apps tierces sans partenariat — voir le guide). Ces
-// montants sont donc un "miroir" purement indicatif, à ajuster à la main.
-// Indexés par nom de membre plutôt que par id : les vrais id Supabase
-// sont des UUID générés, donc un id figé ici ne correspondrait à rien.
-export const tricountBalances = [
-  { name: 'Thomas', balance: 32.5 },
-  { name: 'Julie', balance: -12.0 },
-  { name: 'Lucas', balance: -25.5 },
-  { name: 'Amandine', balance: 5.0 },
-]

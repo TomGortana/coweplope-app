@@ -13,6 +13,7 @@ export default function Header({
   onOpenAdmin,
   absentMemberIds,
   onSaveWeekendSettings,
+  onDeleteWeekend,
 }) {
   const [memberOpen, setMemberOpen] = useState(false)
   const [weekendOpen, setWeekendOpen] = useState(false)
@@ -129,6 +130,7 @@ export default function Header({
           absentMemberIds={absentMemberIds}
           onClose={() => setManageOpen(false)}
           onSave={onSaveWeekendSettings}
+          onDelete={onDeleteWeekend}
         />
       )}
     </header>

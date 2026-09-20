@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 
-export default function WeekendManageModal({ weekend, members, absentMemberIds, onClose, onSave }) {
+export default function WeekendManageModal({ weekend, members, absentMemberIds, onClose, onSave, onDelete }) {
   const [name, setName] = useState(weekend.name)
   const [start, setStart] = useState(weekend.start_date)
   const [end, setEnd] = useState(weekend.end_date)
   const [absent, setAbsent] = useState(new Set(absentMemberIds))
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const canSubmit = name.trim() && start && end
 
@@ -27,6 +28,23 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
       onClose()
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function remove() {
+    if (
+      !window.confirm(
+        `Supprimer définitivement "${weekend.name}" ? Les logements, l'agenda, les courses, les parties de poker et le lien Tricount de cette édition seront perdus. Cette action est irréversible.`
+      )
+    ) {
+      return
+    }
+    setDeleting(true)
+    try {
+      await onDelete(weekend.id)
+      onClose()
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -98,6 +116,14 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
             className="w-full bg-indigo-600 disabled:bg-slate-300 text-white font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
           >
             {saving ? 'Enregistrement…' : 'Enregistrer'}
+          </button>
+
+          <button
+            onClick={remove}
+            disabled={deleting}
+            className="w-full text-center text-xs font-semibold text-rose-500 py-2 active:opacity-70 disabled:opacity-50"
+          >
+            {deleting ? 'Suppression…' : 'Supprimer cette édition'}
           </button>
         </div>
       </div>

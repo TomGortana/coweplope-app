@@ -319,3 +319,8 @@ where w.id = ae.weekend_id and ae.day_date is null;
 alter table agenda_events alter column day_date set not null;
 alter table agenda_events drop column day;
 alter table agenda_events rename column day_date to day;
+
+-- 2026-09-20 : quantité optionnelle sur un article de courses (ex: "2",
+-- "1kg", "3 paquets" — texte libre plutôt que numérique pour rester
+-- flexible).
+alter table shopping_items add column if not exists quantity text;

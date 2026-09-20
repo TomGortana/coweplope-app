@@ -93,6 +93,47 @@ export async function updateWeekend(id, { name, start_date, end_date }) {
   return w
 }
 
+export async function deleteWeekend(id) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('weekends').delete().eq('id', id)
+    if (error) throw error
+    return
+  }
+  await delay()
+  const idx = mock.weekends.findIndex((w) => w.id === id)
+  if (idx >= 0) mock.weekends.splice(idx, 1)
+  // mirroring `on delete cascade` from schema.sql for the mock store
+  const proposalIds = mock.lodgingProposals.filter((p) => p.weekend_id === id).map((p) => p.id)
+  for (let i = mock.lodgingProposals.length - 1; i >= 0; i--) {
+    if (mock.lodgingProposals[i].weekend_id === id) mock.lodgingProposals.splice(i, 1)
+  }
+  for (let i = mock.lodgingVotes.length - 1; i >= 0; i--) {
+    if (proposalIds.includes(mock.lodgingVotes[i].proposal_id)) mock.lodgingVotes.splice(i, 1)
+  }
+  for (let i = mock.lodgingComments.length - 1; i >= 0; i--) {
+    if (proposalIds.includes(mock.lodgingComments[i].proposal_id)) mock.lodgingComments.splice(i, 1)
+  }
+  for (let i = mock.agendaEvents.length - 1; i >= 0; i--) {
+    if (mock.agendaEvents[i].weekend_id === id) mock.agendaEvents.splice(i, 1)
+  }
+  for (let i = mock.shoppingItems.length - 1; i >= 0; i--) {
+    if (mock.shoppingItems[i].weekend_id === id) mock.shoppingItems.splice(i, 1)
+  }
+  const gameIds = mock.pokerGames.filter((g) => g.weekend_id === id).map((g) => g.id)
+  for (let i = mock.pokerGames.length - 1; i >= 0; i--) {
+    if (mock.pokerGames[i].weekend_id === id) mock.pokerGames.splice(i, 1)
+  }
+  for (let i = mock.pokerResults.length - 1; i >= 0; i--) {
+    if (gameIds.includes(mock.pokerResults[i].game_id)) mock.pokerResults.splice(i, 1)
+  }
+  for (let i = mock.tricountLinks.length - 1; i >= 0; i--) {
+    if (mock.tricountLinks[i].weekend_id === id) mock.tricountLinks.splice(i, 1)
+  }
+  for (let i = mock.weekendAbsences.length - 1; i >= 0; i--) {
+    if (mock.weekendAbsences[i].weekend_id === id) mock.weekendAbsences.splice(i, 1)
+  }
+}
+
 // ---------- PRÉSENCE PAR WEEK-END ----------
 // Un membre est présent par défaut ; on ne stocke que les absences.
 export async function getWeekendAttendance(weekendId) {
@@ -349,18 +390,18 @@ export async function getShoppingItems(weekendId) {
   return mock.shoppingItems.filter((s) => s.weekend_id === weekendId)
 }
 
-export async function addShoppingItem(weekend_id, label, created_by) {
+export async function addShoppingItem(weekend_id, label, created_by, quantity) {
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from('shopping_items')
-      .insert({ weekend_id, label, created_by, bought: false })
+      .insert({ weekend_id, label, created_by, quantity: quantity || null, bought: false })
       .select()
       .single()
     if (error) throw error
     return data
   }
   await delay()
-  const item = { id: mock.nextId(), weekend_id, label, bought: false, assigned_to: null, created_by }
+  const item = { id: mock.nextId(), weekend_id, label, quantity: quantity || null, bought: false, assigned_to: null, created_by }
   mock.shoppingItems.push(item)
   return item
 }
@@ -515,18 +556,4 @@ export async function setTricountLink(weekend_id, url) {
   const t = { id: mock.nextId(), weekend_id, url }
   mock.tricountLinks.push(t)
   return t
-}
-
-// Les soldes Tricount ne peuvent pas être récupérés en direct (pas
-// d'API publique tierce) : on affiche un "miroir" simulé, éditable
-// à la main. Voir le guide de mise en place pour les alternatives.
-// Le miroir est indexé par nom de membre (voir mockData.js) : on fait
-// donc la correspondance avec les vrais membres (id UUID) par nom.
-export function getTricountBalances(members = []) {
-  return mock.tricountBalances
-    .map((b) => {
-      const member = members.find((m) => m.name === b.name)
-      return member ? { member_id: member.id, balance: b.balance } : null
-    })
-    .filter(Boolean)
 }

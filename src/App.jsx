@@ -41,11 +41,6 @@ export default function App() {
   const currentMember = membersById[currentMemberId] || members[0]
   const currentWeekend = weekends.find((w) => w.id === currentWeekendId) || weekends[0]
   const isArchived = currentWeekend?.status === 'archived'
-  const presentMembers = useMemo(
-    () => members.filter((m) => !absentMemberIds.includes(m.id)),
-    [members, absentMemberIds]
-  )
-  const balances = api.getTricountBalances(presentMembers)
 
   // Chargement initial : membres + éditions
   useEffect(() => {
@@ -129,6 +124,16 @@ export default function App() {
     if (weekendId === currentWeekend?.id) await reloadWeekendData()
   }
 
+  async function handleDeleteWeekend(weekendId) {
+    await api.deleteWeekend(weekendId)
+    const next = weekends.filter((w) => w.id !== weekendId)
+    setWeekends(next)
+    if (weekendId === currentWeekendId) {
+      const fallback = next.find((w) => w.status === 'active') || next[0]
+      setCurrentWeekendId(fallback ? fallback.id : '')
+    }
+  }
+
   async function handleAddMember(data) {
     const m = await api.addMember(data)
     setMembers((prev) => [...prev, m])
@@ -185,8 +190,8 @@ export default function App() {
     await reloadWeekendData()
   }
 
-  async function handleAddShoppingItem(label) {
-    await api.addShoppingItem(currentWeekend.id, label, currentMember.id)
+  async function handleAddShoppingItem(label, quantity) {
+    await api.addShoppingItem(currentWeekend.id, label, currentMember.id, quantity)
     await reloadWeekendData()
   }
 
@@ -259,6 +264,7 @@ export default function App() {
         onOpenAdmin={() => setAdminOpen(true)}
         absentMemberIds={absentMemberIds}
         onSaveWeekendSettings={handleSaveWeekendSettings}
+        onDeleteWeekend={handleDeleteWeekend}
       />
 
       <main className="pb-24">
@@ -270,7 +276,6 @@ export default function App() {
             agenda={agendaEvents}
             shopping={shoppingItems}
             poker={{ ...poker, membersById }}
-            balance={balances.find((b) => b.member_id === currentMember.id)?.balance ?? 0}
             onNavigate={setActiveTab}
           />
         )}
@@ -317,13 +322,7 @@ export default function App() {
         )}
 
         {activeTab === 'widgets' && currentMember && (
-          <Widgets
-            tricountLink={tricountLink}
-            onSetTricountLink={handleSetTricountLink}
-            balances={balances}
-            membersById={membersById}
-            currentMember={currentMember}
-          />
+          <Widgets tricountLink={tricountLink} onSetTricountLink={handleSetTricountLink} />
         )}
 
         {activeTab === 'poker' && (
