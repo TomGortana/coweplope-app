@@ -56,6 +56,8 @@ export default function App() {
   const [poker, setPoker] = useState({ games: [], results: [] })
   const [tricountLink, setTricountLinkState] = useState(null)
   const [absentMemberIds, setAbsentMemberIds] = useState([])
+  // Réglage global, pas lié à une édition : chargé une fois au démarrage.
+  const [globalPhotosLink, setGlobalPhotosLink] = useState(null)
 
   const membersById = useMemo(() => Object.fromEntries(members.map((m) => [m.id, m])), [members])
   const currentMember = membersById[currentMemberId] || members[0]
@@ -67,10 +69,11 @@ export default function App() {
     let cancelled = false
     async function load() {
       try {
-        const [m, w] = await Promise.all([api.getMembers(), api.getWeekends()])
+        const [m, w, settings] = await Promise.all([api.getMembers(), api.getWeekends(), api.getAppSettings()])
         if (cancelled) return
         setMembers(m)
         setWeekends(w)
+        setGlobalPhotosLink(settings?.global_photos_link || null)
         if ((!currentWeekendId || !w.find((x) => x.id === currentWeekendId)) && w[0]) {
           const active = w.find((x) => x.status === 'active') || w[0]
           setCurrentWeekendId(active.id)
@@ -272,6 +275,18 @@ export default function App() {
     notify('Lien Tricount mis à jour.')
   }
 
+  async function handleSetPhotosLink(url) {
+    const w = await api.setPhotosLink(currentWeekend.id, url)
+    setWeekends((prev) => prev.map((x) => (x.id === w.id ? w : x)))
+    notify('Lien photos mis à jour.')
+  }
+
+  async function handleSetGlobalPhotosLink(url) {
+    await api.setGlobalPhotosLink(url)
+    setGlobalPhotosLink(url)
+    notify('Lien photos mis à jour.')
+  }
+
   async function handleAddPokerGame(data) {
     await api.addPokerGame(currentWeekend.id, data)
     await reloadWeekendData()
@@ -350,6 +365,9 @@ export default function App() {
             shopping={shoppingItems}
             poker={{ ...poker, membersById }}
             onNavigate={setActiveTab}
+            onSetPhotosLink={handleSetPhotosLink}
+            globalPhotosLink={globalPhotosLink}
+            onSetGlobalPhotosLink={handleSetGlobalPhotosLink}
           />
         )}
 

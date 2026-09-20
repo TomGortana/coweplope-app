@@ -1,7 +1,19 @@
-import { Home, CalendarDays, ShoppingCart, Trophy, Wallet } from 'lucide-react'
+import { useState } from 'react'
+import { Home, CalendarDays, ShoppingCart, Trophy, Wallet, Camera, Images, Settings2, ExternalLink } from 'lucide-react'
 import Avatar from './Avatar'
 
-export default function Dashboard({ currentMember, weekend, lodging, agenda, shopping, poker, onNavigate }) {
+export default function Dashboard({
+  currentMember,
+  weekend,
+  lodging,
+  agenda,
+  shopping,
+  poker,
+  onNavigate,
+  onSetPhotosLink,
+  globalPhotosLink,
+  onSetGlobalPhotosLink,
+}) {
   const pendingLodging = lodging.filter((p) => p.status === 'proposed').length
   const validated = lodging.find((p) => p.status === 'validated')
   const nextEvent = agenda[0]
@@ -82,6 +94,77 @@ export default function Dashboard({ currentMember, weekend, lodging, agenda, sho
             </div>
           </div>
         </button>
+      )}
+
+      {/* Toujours affiché, indépendant de l'édition sélectionnée */}
+      <LinkCard
+        icon={Images}
+        title="Toutes les photos Coweplope"
+        link={globalPhotosLink}
+        onSetLink={onSetGlobalPhotosLink}
+        placeholder="Lien Google Drive (toutes éditions)..."
+        openLabel="Accroche-toi bien avant de consulter les photos depuis les origines"
+      />
+
+      {/* key={weekend.id} : réinitialise le champ d'édition quand on
+          change d'édition, pour ne pas garder le lien de la précédente */}
+      <LinkCard
+        key={weekend?.id}
+        icon={Camera}
+        title="Photos de ce week-end"
+        link={weekend?.photos_link}
+        onSetLink={onSetPhotosLink}
+        placeholder="Lien Google Drive (cette édition)..."
+        openLabel="Dépose/consulte les photos ici"
+      />
+    </div>
+  )
+}
+
+function LinkCard({ icon: Icon, title, link, onSetLink, placeholder, openLabel }) {
+  const [editing, setEditing] = useState(false)
+  const [url, setUrl] = useState(link || '')
+
+  return (
+    <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-4">
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-sm font-semibold text-zinc-200 flex items-center gap-1.5">
+          <Icon size={15} className="text-amber-400" /> {title}
+        </p>
+        <button onClick={() => setEditing((e) => !e)} className="text-zinc-500 active:text-zinc-300 p-1">
+          <Settings2 size={14} />
+        </button>
+      </div>
+
+      {editing ? (
+        <div className="flex gap-2 mt-2">
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder={placeholder}
+            className="flex-1 px-3 py-2 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+          />
+          <button
+            onClick={() => {
+              onSetLink(url.trim())
+              setEditing(false)
+            }}
+            className="px-3 py-2 rounded-xl bg-zinc-100 text-zinc-900 text-xs font-semibold active:scale-95"
+          >
+            OK
+          </button>
+        </div>
+      ) : link ? (
+        <a
+          href={link}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm text-amber-400 font-medium flex items-center gap-1 mt-1"
+        >
+          {openLabel} <ExternalLink size={12} />
+        </a>
+      ) : (
+        <p className="text-xs text-zinc-500 mt-1">Aucun dossier partagé configuré pour l'instant.</p>
       )}
     </div>
   )

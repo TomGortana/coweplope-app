@@ -70,3 +70,6 @@ export const weekendAbsences = []
 export const tricountLinks = [
   { id: 't1', weekend_id: 'w1', url: 'https://tricount.com/xxxxx' },
 ]
+
+// Réglages globaux (pas liés à une édition) : lien "toutes les photos".
+export const appSettings = { global_photos_link: null }

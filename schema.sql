@@ -339,3 +339,21 @@ create policy "allow all - avatars read" on storage.objects for select using (bu
 create policy "allow all - avatars write" on storage.objects for insert with check (bucket_id = 'avatars');
 create policy "allow all - avatars update" on storage.objects for update using (bucket_id = 'avatars');
 create policy "allow all - avatars delete" on storage.objects for delete using (bucket_id = 'avatars');
+
+-- 2026-09-20 : lien vers un dossier partagé (ex: Google Drive) pour les
+-- photos du week-end, un par édition — affiché sur le Dashboard.
+alter table weekends add column if not exists photos_link text;
+
+-- 2026-09-20 : réglages globaux de l'app (pas liés à une édition en
+-- particulier) — pour l'instant juste le lien "toutes les photos
+-- Coweplope". Table à une seule ligne (id booléen forcé à true).
+create table if not exists app_settings (
+  id boolean primary key default true,
+  global_photos_link text,
+  constraint app_settings_singleton check (id)
+);
+
+alter table app_settings enable row level security;
+create policy "allow all - app_settings" on app_settings for all using (true) with check (true);
+
+insert into app_settings (id) values (true) on conflict (id) do nothing;

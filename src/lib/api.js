@@ -639,3 +639,49 @@ export async function setTricountLink(weekend_id, url) {
   mock.tricountLinks.push(t)
   return t
 }
+
+// Lien vers un dossier partagé (ex: Google Drive) pour les photos du
+// week-end, stocké directement sur l'édition (un lien par week-end).
+export async function setPhotosLink(weekend_id, url) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('weekends')
+      .update({ photos_link: url })
+      .eq('id', weekend_id)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+  await delay()
+  const w = mock.weekends.find((x) => x.id === weekend_id)
+  if (w) w.photos_link = url
+  return w
+}
+
+// ---------- RÉGLAGES GLOBAUX ----------
+export async function getAppSettings() {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase.from('app_settings').select('*').eq('id', true).single()
+    if (error) throw error
+    return data
+  }
+  await delay()
+  return mock.appSettings
+}
+
+export async function setGlobalPhotosLink(url) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('app_settings')
+      .update({ global_photos_link: url })
+      .eq('id', true)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+  await delay()
+  mock.appSettings.global_photos_link = url
+  return mock.appSettings
+}
