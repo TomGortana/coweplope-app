@@ -36,9 +36,9 @@ export const lodgingComments = [
 ]
 
 export const agendaEvents = [
-  { id: 'a1', weekend_id: 'w1', day: 'ven', start_time: '19:00', end_time: '21:00', title: 'Arrivée + installation', responsible_id: 'm1' },
-  { id: 'a2', weekend_id: 'w1', day: 'sam', start_time: '10:00', end_time: '12:00', title: 'Randonnée', responsible_id: 'm4' },
-  { id: 'a3', weekend_id: 'w1', day: 'sam', start_time: '20:00', end_time: '23:59', title: 'Soirée poker', responsible_id: 'm3' },
+  { id: 'a1', weekend_id: 'w1', day: '2026-11-13', start_time: '19:00', end_time: '21:00', title: 'Arrivée + installation', responsible_id: 'm1' },
+  { id: 'a2', weekend_id: 'w1', day: '2026-11-14', start_time: '10:00', end_time: '12:00', title: 'Randonnée', responsible_id: 'm4' },
+  { id: 'a3', weekend_id: 'w1', day: '2026-11-14', start_time: '20:00', end_time: '23:59', title: 'Soirée poker', responsible_id: 'm3' },
 ]
 
 export const shoppingItems = [

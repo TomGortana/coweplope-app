@@ -46,7 +46,7 @@ export default function Dashboard({ currentMember, weekend, lodging, agenda, sho
         <Card icon={CalendarDays} color="sky" title="Agenda" onClick={() => onNavigate('agenda')}>
           {nextEvent ? (
             <p className="text-sm text-slate-600 truncate">
-              {DAY_LABEL[nextEvent.day]} {nextEvent.start_time?.slice(0, 5)} · {nextEvent.title}
+              {formatEventDay(nextEvent.day)} {nextEvent.start_time?.slice(0, 5)} · {nextEvent.title}
             </p>
           ) : (
             <p className="text-sm text-slate-400">Rien de prévu</p>
@@ -88,7 +88,11 @@ export default function Dashboard({ currentMember, weekend, lodging, agenda, sho
   )
 }
 
-const DAY_LABEL = { ven: 'Ven', sam: 'Sam', dim: 'Dim' }
+function formatEventDay(iso) {
+  if (!iso) return ''
+  const d = new Date(iso + 'T00:00:00')
+  return d.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' })
+}
 
 function Card({ icon: Icon, color, title, children, onClick }) {
   const colors = {

@@ -294,6 +294,7 @@ export default function App() {
 
         {activeTab === 'agenda' && (
           <Agenda
+            weekend={currentWeekend}
             events={agendaEvents}
             membersById={membersById}
             onAdd={handleAddAgendaEvent}

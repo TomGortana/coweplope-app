@@ -129,16 +129,18 @@ function GameCard({ game, results, membersById, onSetResult, onDeleteGame, isArc
   )
 }
 
-// Saisie simplifiée : le barème (gain du 1er/2e/3e) a été fixé à la
-// création de la partie. Ici on choisit juste qui a fini à quelle
-// place, et les gains sont calculés automatiquement. Les autres
-// participants restent à 0 € automatiquement.
+// Saisie simplifiée : le barème (gain BRUT du 1er/2e/3e) a été fixé à
+// la création de la partie. Ici on choisit juste qui a fini à quelle
+// place ; le gain NET affiché ensuite tient compte de la mise (payout -
+// buy-in), et les non-classés perdent leur mise (-buy-in).
 function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
+  const buyIn = Number(game.buy_in) || 0
   const payouts = [Number(game.payout_1st) || 0, Number(game.payout_2nd) || 0, Number(game.payout_3rd) || 0]
   const rankCount = Math.min(RANK_LABELS.length, participants.length)
   const [ranking, setRanking] = useState(() =>
     Array.from({ length: rankCount }, (_, i) => {
-      const r = results.find((res) => Number(res.net_result) === payouts[i] && payouts[i] > 0)
+      const expectedNet = payouts[i] - buyIn
+      const r = results.find((res) => Number(res.net_result) === expectedNet && payouts[i] > 0)
       return r ? r.member_id : ''
     })
   )
@@ -156,11 +158,11 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
   async function save() {
     setSaving(true)
     try {
-      const winners = ranking.map((member_id, i) => ({ member_id, amount: payouts[i] })).filter((w) => w.member_id)
+      const winners = ranking.map((member_id, i) => ({ member_id, amount: payouts[i] - buyIn })).filter((w) => w.member_id)
       const winnerIds = new Set(winners.map((w) => w.member_id))
       await Promise.all([
         ...winners.map((w) => onSetResult(game.id, w.member_id, w.amount)),
-        ...participants.filter((m) => !winnerIds.has(m.id)).map((m) => onSetResult(game.id, m.id, 0)),
+        ...participants.filter((m) => !winnerIds.has(m.id)).map((m) => onSetResult(game.id, m.id, -buyIn)),
       ])
       onDone()
     } finally {
@@ -172,8 +174,9 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
     <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
       {ranking.map((memberId, i) => (
         <div key={i} className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400 w-16 shrink-0">
-            {RANK_LABELS[i]} (+{payouts[i]}€)
+          <span className="text-xs font-semibold text-slate-400 w-20 shrink-0">
+            {RANK_LABELS[i]} ({payouts[i] - buyIn >= 0 ? '+' : ''}
+            {payouts[i] - buyIn}€)
           </span>
           <select
             value={memberId}
@@ -189,7 +192,7 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
           </select>
         </div>
       ))}
-      <p className="text-[11px] text-slate-300">Les autres joueurs restent à 0 €.</p>
+      <p className="text-[11px] text-slate-300">Les autres joueurs perdent leur mise ({-buyIn}€).</p>
       <button
         onClick={save}
         disabled={saving}

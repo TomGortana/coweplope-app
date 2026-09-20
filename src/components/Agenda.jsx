@@ -1,20 +1,30 @@
 import { useState } from 'react'
 import { Plus, Trash2, X } from 'lucide-react'
 
-const DAYS = [
-  { key: 'ven', label: 'Vendredi' },
-  { key: 'sam', label: 'Samedi' },
-  { key: 'dim', label: 'Dimanche' },
-]
+function buildDays(weekend) {
+  if (!weekend?.start_date || !weekend?.end_date) return []
+  const days = []
+  const cur = new Date(weekend.start_date + 'T00:00:00')
+  const end = new Date(weekend.end_date + 'T00:00:00')
+  while (cur <= end) {
+    const iso = cur.toISOString().slice(0, 10)
+    const weekday = cur.toLocaleDateString('fr-FR', { weekday: 'long' })
+    const shortDate = cur.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+    days.push({ key: iso, label: weekday.charAt(0).toUpperCase() + weekday.slice(1), shortDate })
+    cur.setDate(cur.getDate() + 1)
+  }
+  return days
+}
 
-export default function Agenda({ events, membersById, onAdd, onDelete, isArchived }) {
+export default function Agenda({ weekend, events, membersById, onAdd, onDelete, isArchived }) {
   const [formDay, setFormDay] = useState(null)
+  const days = buildDays(weekend)
 
   return (
     <div className="px-4 pt-4 pb-6 space-y-5">
       <h1 className="text-lg font-bold text-slate-900">Agenda</h1>
 
-      {DAYS.map(({ key, label }) => {
+      {days.map(({ key, label, shortDate }) => {
         const dayEvents = events
           .filter((e) => e.day === key)
           .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
@@ -22,7 +32,9 @@ export default function Agenda({ events, membersById, onAdd, onDelete, isArchive
         return (
           <div key={key}>
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">{label}</h2>
+              <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+                {label} <span className="text-slate-400 font-medium normal-case">· {shortDate}</span>
+              </h2>
               {!isArchived && (
                 <button
                   onClick={() => setFormDay(key)}
@@ -72,7 +84,7 @@ export default function Agenda({ events, membersById, onAdd, onDelete, isArchive
 
       {formDay && (
         <EventForm
-          day={formDay}
+          dayLabel={days.find((d) => d.key === formDay)?.label}
           membersById={membersById}
           onClose={() => setFormDay(null)}
           onSubmit={(data) => onAdd({ ...data, day: formDay })}
@@ -82,7 +94,7 @@ export default function Agenda({ events, membersById, onAdd, onDelete, isArchive
   )
 }
 
-function EventForm({ day, membersById, onClose, onSubmit }) {
+function EventForm({ dayLabel, membersById, onClose, onSubmit }) {
   const [title, setTitle] = useState('')
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')
@@ -161,7 +173,7 @@ function EventForm({ day, membersById, onClose, onSubmit }) {
             disabled={!canSubmit || saving}
             className="w-full bg-indigo-600 disabled:bg-slate-300 text-white font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
           >
-            {saving ? 'Ajout…' : 'Ajouter à ' + { ven: 'vendredi', sam: 'samedi', dim: 'dimanche' }[day]}
+            {saving ? 'Ajout…' : `Ajouter à ${dayLabel || ''}`}
           </button>
         </div>
       </div>

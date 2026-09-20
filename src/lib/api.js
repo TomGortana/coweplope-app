@@ -296,12 +296,15 @@ export async function getAgendaEvents(weekendId) {
       .from('agenda_events')
       .select('*')
       .eq('weekend_id', weekendId)
+      .order('day')
       .order('start_time')
     if (error) throw error
     return data
   }
   await delay()
-  return mock.agendaEvents.filter((e) => e.weekend_id === weekendId)
+  return mock.agendaEvents
+    .filter((e) => e.weekend_id === weekendId)
+    .sort((a, b) => a.day.localeCompare(b.day) || (a.start_time || '').localeCompare(b.start_time || ''))
 }
 
 export async function addAgendaEvent(weekend_id, { day, start_time, end_time, title, responsible_id }) {

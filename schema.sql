@@ -302,3 +302,20 @@ alter table lodging_comments add constraint lodging_comments_member_id_fkey
 alter table poker_games add column if not exists payout_1st numeric not null default 0;
 alter table poker_games add column if not exists payout_2nd numeric not null default 0;
 alter table poker_games add column if not exists payout_3rd numeric not null default 0;
+
+-- 2026-09-20 : l'agenda passe de 3 jours fixes ('ven'/'sam'/'dim') à
+-- une vraie date par événement, calculée sur les dates réelles de
+-- l'édition (donc un week-end plus long que 3 jours affiche bien tous
+-- ses jours). Migration : on ajoute une colonne date, on la remplit à
+-- partir de l'ancien code + la date de début de l'édition (ven=+0,
+-- sam=+1, dim=+2), puis on bascule dessus.
+alter table agenda_events add column if not exists day_date date;
+
+update agenda_events ae
+set day_date = w.start_date + (case ae.day when 'ven' then 0 when 'sam' then 1 when 'dim' then 2 else 0 end)
+from weekends w
+where w.id = ae.weekend_id and ae.day_date is null;
+
+alter table agenda_events alter column day_date set not null;
+alter table agenda_events drop column day;
+alter table agenda_events rename column day_date to day;
