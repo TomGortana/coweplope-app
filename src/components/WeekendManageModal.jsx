@@ -54,7 +54,7 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
   return (
     <div className="fixed inset-0 z-50 flex items-end">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full bg-zinc-800 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] max-h-[85vh] overflow-y-auto">
+      <div className="relative w-full bg-zinc-700 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-zinc-100">Modifier l'édition</h2>
           <button onClick={onClose} className="p-1 text-zinc-500 active:text-zinc-200">
@@ -67,7 +67,7 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
             />
           </div>
           <div className="flex gap-3">
@@ -77,7 +77,7 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
                 type="date"
                 value={start}
                 onChange={(e) => setStart(e.target.value)}
-                className="w-full mt-1 px-3 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full mt-1 px-3 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
               />
             </div>
             <div className="flex-1">
@@ -86,7 +86,7 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
                 type="date"
                 value={end}
                 onChange={(e) => setEnd(e.target.value)}
-                className="w-full mt-1 px-3 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full mt-1 px-3 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
               />
             </div>
           </div>
@@ -101,7 +101,7 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
                     key={m.id}
                     onClick={() => toggle(m.id)}
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium text-left ${
-                      isAbsent ? 'border-zinc-600 text-zinc-500 bg-zinc-700' : 'border-emerald-700 bg-emerald-500/10 text-emerald-300'
+                      isAbsent ? 'border-zinc-500 text-zinc-500 bg-zinc-600' : 'border-emerald-700 bg-emerald-500/10 text-emerald-300'
                     }`}
                   >
                     <Avatar member={m} size="sm" />
@@ -117,14 +117,14 @@ export default function WeekendManageModal({ weekend, members, absentMemberIds, 
             <button
               onClick={remove}
               disabled={deleting}
-              className="flex-1 bg-rose-600 disabled:bg-zinc-600 text-white font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
+              className="flex-1 bg-rose-600 disabled:bg-zinc-500 text-white font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
             >
               {deleting ? 'Suppression…' : 'Supprimer'}
             </button>
             <button
               onClick={submit}
               disabled={!canSubmit || saving}
-              className="flex-1 bg-amber-500 disabled:bg-zinc-600 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
+              className="flex-1 bg-copper-500 disabled:bg-zinc-500 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
             >
               {saving ? 'Enregistrement…' : 'Enregistrer'}
             </button>

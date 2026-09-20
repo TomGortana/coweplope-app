@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Couleur d'accent "cuivre/bronze" — remplace le doré/amber d'origine.
+   Pas de famille "copper" native dans Tailwind, on la définit ici. */
+@theme {
+  --color-copper-200: #e8c39c;
+  --color-copper-300: #d99a5f;
+  --color-copper-400: #c98548;
+  --color-copper-500: #b87333;
+  --color-copper-700: #8a5525;
+  --color-copper-800: #6e421d;
+}
+
 html, body, #root {
   height: 100%;
 }
@@ -8,7 +19,7 @@ body {
   margin: 0;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: contain;
-  background-color: #18181b;
+  background-color: #27272a;
   color-scheme: dark;
 }
 

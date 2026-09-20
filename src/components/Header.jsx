@@ -33,7 +33,7 @@ export default function Header({
   }
 
   return (
-    <header className="sticky top-0 z-30 bg-zinc-800 border-b border-zinc-700">
+    <header className="sticky top-0 z-30 bg-zinc-700 border-b border-zinc-600">
       <div className="flex items-center justify-between px-4 pt-3 pb-2">
         <div>
           <p className="text-[11px] text-zinc-500 font-medium leading-none">Coweplope Organizer</p>
@@ -58,7 +58,7 @@ export default function Header({
           </a>
           <button
             onClick={onOpenAdmin}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-700 text-zinc-300 active:scale-95 transition"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-zinc-600 text-zinc-300 active:scale-95 transition"
             aria-label="Administration"
           >
             <Settings size={20} />
@@ -79,13 +79,13 @@ export default function Header({
                   onOpenManageWeekend()
                   setWeekendOpen(false)
                 }}
-                className="flex items-center gap-1 text-xs font-semibold text-amber-400 active:opacity-70"
+                className="flex items-center gap-1 text-xs font-semibold text-copper-400 active:opacity-70"
               >
                 <Pencil size={12} /> Modifier / présence
               </button>
             )}
           </div>
-          <div className="bg-zinc-700/60 rounded-2xl p-2 space-y-1">
+          <div className="bg-zinc-600/60 rounded-2xl p-2 space-y-1">
             {weekends.map((w) => (
               <button
                 key={w.id}
@@ -93,7 +93,7 @@ export default function Header({
                   onChangeWeekend(w.id)
                   setWeekendOpen(false)
                 }}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl active:bg-zinc-600 text-left"
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl active:bg-zinc-500 text-left"
               >
                 <div>
                   <p className="text-sm font-semibold text-zinc-200">{w.name}</p>
@@ -101,7 +101,7 @@ export default function Header({
                     {formatRange(w.start_date, w.end_date)} · {w.status === 'archived' ? 'Archivé' : 'Actif'}
                   </p>
                 </div>
-                {w.id === currentWeekend?.id && <Check size={18} className="text-amber-400 shrink-0" />}
+                {w.id === currentWeekend?.id && <Check size={18} className="text-copper-400 shrink-0" />}
               </button>
             ))}
           </div>
@@ -111,7 +111,7 @@ export default function Header({
       {memberOpen && (
         <div className="px-4 pb-3">
           {currentMember && (
-            <div className="bg-zinc-700/60 rounded-2xl p-3 mb-2 flex items-center gap-3">
+            <div className="bg-zinc-600/60 rounded-2xl p-3 mb-2 flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
@@ -120,7 +120,7 @@ export default function Header({
                 aria-label="Changer ma photo"
               >
                 <Avatar member={currentMember} size="lg" />
-                <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center">
+                <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-copper-500 flex items-center justify-center">
                   <Camera size={10} className="text-zinc-950" />
                 </span>
               </button>
@@ -131,14 +131,14 @@ export default function Header({
                   type="button"
                   onClick={() => photoInputRef.current?.click()}
                   disabled={uploadingPhoto}
-                  className="text-xs font-medium text-amber-400 active:opacity-70 disabled:opacity-50"
+                  className="text-xs font-medium text-copper-400 active:opacity-70 disabled:opacity-50"
                 >
                   {uploadingPhoto ? 'Envoi…' : 'Changer ma photo'}
                 </button>
               </div>
             </div>
           )}
-          <div className="bg-zinc-700/60 rounded-2xl p-2 grid grid-cols-4 gap-1">
+          <div className="bg-zinc-600/60 rounded-2xl p-2 grid grid-cols-4 gap-1">
             {members.map((m) => (
               <button
                 key={m.id}
@@ -146,8 +146,8 @@ export default function Header({
                   onChangeMember(m.id)
                   setMemberOpen(false)
                 }}
-                className={`flex flex-col items-center gap-1 py-2 rounded-xl active:bg-zinc-600 ${
-                  m.id === currentMember?.id ? 'ring-2 ring-amber-500' : ''
+                className={`flex flex-col items-center gap-1 py-2 rounded-xl active:bg-zinc-500 ${
+                  m.id === currentMember?.id ? 'ring-2 ring-copper-500' : ''
                 }`}
               >
                 <Avatar member={m} size="lg" />

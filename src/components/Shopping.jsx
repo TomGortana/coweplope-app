@@ -5,7 +5,6 @@ import Avatar from './Avatar'
 
 export default function Shopping({ items, membersById, currentMember, onAdd, onEdit, onToggle, onAssign, onDelete, isArchived }) {
   const [text, setText] = useState('')
-  const [qty, setQty] = useState('')
   const [editingItem, setEditingItem] = useState(null)
   const todo = items.filter((i) => !i.bought)
   const done = items.filter((i) => i.bought)
@@ -13,10 +12,8 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onE
   async function submit() {
     if (!text.trim()) return
     const value = text.trim()
-    const quantity = qty.trim()
     setText('')
-    setQty('')
-    await onAdd(value, quantity)
+    await onAdd(value)
   }
 
   return (
@@ -26,22 +23,15 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onE
       {!isArchived && (
         <div className="flex gap-2">
           <input
-            value={qty}
-            onChange={(e) => setQty(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && submit()}
-            placeholder="Qté"
-            className="w-16 px-2 py-3 rounded-xl bg-zinc-800 text-sm text-zinc-100 text-center outline-none focus:ring-2 focus:ring-amber-500"
-          />
-          <input
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && submit()}
             placeholder="Ajouter un article..."
-            className="flex-1 px-4 py-3 rounded-xl bg-zinc-800 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+            className="flex-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
           />
           <button
             onClick={submit}
-            className="w-12 h-12 shrink-0 flex items-center justify-center rounded-xl bg-amber-500 text-zinc-950 active:scale-95 transition"
+            className="w-12 h-12 shrink-0 flex items-center justify-center rounded-xl bg-copper-500 text-zinc-950 active:scale-95 transition"
           >
             <Plus size={20} />
           </button>
@@ -108,18 +98,17 @@ function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, onE
   }
 
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 flex items-center gap-3">
+    <div className="bg-zinc-700 border border-zinc-600 rounded-xl p-3 flex items-center gap-3">
       <button
         onClick={() => !isArchived && onToggle(item.id, !item.bought)}
         disabled={isArchived}
         className={`w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center transition ${
-          item.bought ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-600'
+          item.bought ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-500'
         }`}
       >
         {item.bought && <Check size={14} className="text-white" strokeWidth={3} />}
       </button>
-      <p className={`flex-1 text-sm text-zinc-200 ${item.bought ? 'line-through text-zinc-500' : ''}`}>
-        {item.quantity && <span className="text-zinc-500 font-semibold mr-1.5">{item.quantity}</span>}
+      <p className={`flex-1 min-w-0 text-sm text-zinc-200 truncate ${item.bought ? 'line-through text-zinc-500' : ''}`}>
         {item.label}
       </p>
       {!isArchived &&
@@ -130,13 +119,13 @@ function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, onE
         ) : (
           <button
             onClick={() => onAssign(item.id, currentMember.id)}
-            className="shrink-0 flex items-center gap-1 text-xs font-semibold text-amber-400 border border-amber-800 rounded-lg px-2 py-1 active:bg-amber-500/10"
+            className="shrink-0 flex items-center gap-1 text-xs font-semibold text-copper-400 border border-copper-800 rounded-lg px-2 py-1 active:bg-copper-500/10"
           >
             <User size={12} /> Je m'en occupe
           </button>
         ))}
       {!isArchived && (
-        <button onClick={onEdit} className="text-zinc-600 active:text-amber-400 p-1 shrink-0">
+        <button onClick={onEdit} className="text-zinc-600 active:text-copper-400 p-1 shrink-0">
           <Pencil size={16} />
         </button>
       )}
@@ -152,7 +141,6 @@ function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, onE
 function ItemEditForm({ item, onClose, onSubmit }) {
   useLockBodyScroll()
   const [label, setLabel] = useState(item.label)
-  const [quantity, setQuantity] = useState(item.quantity || '')
   const [saving, setSaving] = useState(false)
 
   const canSubmit = label.trim()
@@ -161,7 +149,7 @@ function ItemEditForm({ item, onClose, onSubmit }) {
     if (!canSubmit) return
     setSaving(true)
     try {
-      await onSubmit({ label: label.trim(), quantity: quantity.trim() })
+      await onSubmit({ label: label.trim() })
       onClose()
     } finally {
       setSaving(false)
@@ -171,33 +159,25 @@ function ItemEditForm({ item, onClose, onSubmit }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full bg-zinc-800 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
+      <div className="relative w-full bg-zinc-700 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-zinc-100">Modifier l'article</h2>
           <button onClick={onClose} className="p-1 text-zinc-500 active:text-zinc-200">
             <X size={22} />
           </button>
         </div>
-        <div className="flex gap-2">
-          <input
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            placeholder="Qté"
-            className="w-16 px-2 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 text-center outline-none focus:ring-2 focus:ring-amber-500"
-          />
-          <input
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && submit()}
-            placeholder="Article"
-            autoFocus
-            className="flex-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
-          />
-        </div>
+        <input
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && submit()}
+          placeholder="Article"
+          autoFocus
+          className="w-full px-4 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
+        />
         <button
           onClick={submit}
           disabled={!canSubmit || saving}
-          className="w-full mt-3 bg-amber-500 disabled:bg-zinc-600 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
+          className="w-full mt-3 bg-copper-500 disabled:bg-zinc-500 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
         >
           {saving ? 'Enregistrement…' : 'Enregistrer'}
         </button>

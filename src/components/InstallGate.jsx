@@ -16,16 +16,16 @@ export default function InstallGate({ onContinue }) {
   const platform = detectPlatform()
 
   return (
-    <div className="fixed inset-0 z-50 bg-zinc-900 flex flex-col items-center justify-center px-6 text-center">
+    <div className="fixed inset-0 z-50 bg-zinc-800 flex flex-col items-center justify-center px-6 text-center">
       <div className="w-full max-w-sm">
         <img src="/logo.png" alt="Coweplope" className="w-32 h-32 mx-auto mb-5" />
-        <p className="flex items-center justify-center gap-1.5 text-amber-400 text-xs font-semibold uppercase tracking-wide mb-2">
+        <p className="flex items-center justify-center gap-1.5 text-copper-400 text-xs font-semibold uppercase tracking-wide mb-2">
           <Sparkles size={14} /> Le Coweplope a désormais son appli
         </p>
         <h1 className="text-xl font-bold text-zinc-100 mb-2">Coweplope Organizer</h1>
         <p className="text-sm text-zinc-400 mb-6">Installe-la sur ton smartphone en suivant les instructions ci-dessous.</p>
 
-        <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-4 text-left space-y-3">
+        <div className="bg-zinc-700 border border-zinc-600 rounded-2xl p-4 text-left space-y-3">
           {platform === 'ios' && (
             <>
               <Step icon={Share} text={<>Appuie sur <strong className="text-zinc-200">Partager</strong> en bas de Safari</>} />
@@ -54,7 +54,7 @@ export default function InstallGate({ onContinue }) {
 function Step({ icon: Icon, n, text }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="w-6 h-6 shrink-0 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs font-bold">
+      <span className="w-6 h-6 shrink-0 rounded-full bg-copper-500/10 text-copper-400 flex items-center justify-center text-xs font-bold">
         {Icon ? <Icon size={13} /> : n}
       </span>
       <p className="text-sm text-zinc-300">{text}</p>

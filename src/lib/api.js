@@ -412,11 +412,11 @@ export async function addAgendaEvent(weekend_id, { day, start_time, end_time, ti
   return e
 }
 
-export async function updateAgendaEvent(id, { title, start_time, end_time, responsible_id }) {
+export async function updateAgendaEvent(id, { title, day, start_time, end_time, responsible_id }) {
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from('agenda_events')
-      .update({ title, start_time, end_time, responsible_id })
+      .update({ title, day, start_time, end_time, responsible_id })
       .eq('id', id)
       .select()
       .single()
@@ -425,7 +425,7 @@ export async function updateAgendaEvent(id, { title, start_time, end_time, respo
   }
   await delay()
   const e = mock.agendaEvents.find((x) => x.id === id)
-  if (e) Object.assign(e, { title, start_time, end_time, responsible_id })
+  if (e) Object.assign(e, { title, day, start_time, end_time, responsible_id })
   return e
 }
 
@@ -482,20 +482,15 @@ export async function toggleShoppingItem(id, bought) {
   if (item) item.bought = bought
 }
 
-export async function updateShoppingItem(id, { label, quantity }) {
+export async function updateShoppingItem(id, { label }) {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
-      .from('shopping_items')
-      .update({ label, quantity: quantity || null })
-      .eq('id', id)
-      .select()
-      .single()
+    const { data, error } = await supabase.from('shopping_items').update({ label }).eq('id', id).select().single()
     if (error) throw error
     return data
   }
   await delay()
   const item = mock.shoppingItems.find((s) => s.id === id)
-  if (item) Object.assign(item, { label, quantity: quantity || null })
+  if (item) item.label = label
   return item
 }
 

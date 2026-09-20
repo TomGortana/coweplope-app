@@ -225,17 +225,26 @@ export default function App() {
     await reloadWeekendData()
   }
 
-  async function handleAddAgendaEvent(data) {
-    await api.addAgendaEvent(currentWeekend.id, { ...data, responsible_id: data.responsible_id || null })
+  async function handleAddAgendaEvent({ days, ...fields }) {
+    for (const day of days) {
+      await api.addAgendaEvent(currentWeekend.id, { ...fields, day, responsible_id: fields.responsible_id || null })
+    }
     await reloadWeekendData()
     notify(
       'Activité ajoutée !',
-      `🗓️ ${actorTag()} a ajouté une activité "${data.title}" sur ${APP_NAME} !\nVoir l'agenda : ${SITE_URL}/#agenda`
+      `🗓️ ${actorTag()} a ajouté une activité "${fields.title}" sur ${APP_NAME} !\nVoir l'agenda : ${SITE_URL}/#agenda`
     )
   }
 
-  async function handleEditAgendaEvent(id, data) {
-    await api.updateAgendaEvent(id, data)
+  // La ligne modifiée prend le premier jour sélectionné ; tout jour en
+  // plus crée une nouvelle occurrence (répétition) plutôt que de
+  // déplacer/supprimer quoi que ce soit d'existant.
+  async function handleEditAgendaEvent(id, { days, ...fields }) {
+    const [firstDay, ...extraDays] = days
+    await api.updateAgendaEvent(id, { ...fields, day: firstDay })
+    for (const day of extraDays) {
+      await api.addAgendaEvent(currentWeekend.id, { ...fields, day })
+    }
     await reloadWeekendData()
   }
 
@@ -244,8 +253,8 @@ export default function App() {
     await reloadWeekendData()
   }
 
-  async function handleAddShoppingItem(label, quantity) {
-    await api.addShoppingItem(currentWeekend.id, label, currentMember.id, quantity)
+  async function handleAddShoppingItem(label) {
+    await api.addShoppingItem(currentWeekend.id, label, currentMember.id)
     await reloadWeekendData()
   }
 
@@ -319,13 +328,13 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-zinc-900 text-zinc-500 text-sm">Chargement…</div>
+      <div className="h-screen flex items-center justify-center bg-zinc-800 text-zinc-500 text-sm">Chargement…</div>
     )
   }
 
   if (error) {
     return (
-      <div className="h-screen flex items-center justify-center px-6 text-center bg-zinc-900">
+      <div className="h-screen flex items-center justify-center px-6 text-center bg-zinc-800">
         <p className="text-sm text-rose-400">{error}</p>
       </div>
     )
@@ -336,9 +345,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen max-w-md mx-auto bg-zinc-900 relative">
+    <div className="min-h-screen max-w-md mx-auto bg-zinc-800 relative">
       {!isSupabaseConfigured && (
-        <div className="bg-amber-500/10 text-amber-400 text-[11px] text-center py-1.5 px-3 font-medium">
+        <div className="bg-copper-500/10 text-copper-400 text-[11px] text-center py-1.5 px-3 font-medium">
           Mode démo (données simulées) — configure .env pour connecter Supabase
         </div>
       )}

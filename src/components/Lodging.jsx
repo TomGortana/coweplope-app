@@ -14,7 +14,7 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
         {!isArchived && (
           <button
             onClick={() => setFormTarget('new')}
-            className="flex items-center gap-1 text-sm font-semibold text-amber-400 active:opacity-70"
+            className="flex items-center gap-1 text-sm font-semibold text-copper-400 active:opacity-70"
           >
             <Plus size={18} /> Proposer
           </button>
@@ -37,8 +37,8 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
         return (
           <div
             key={p.id}
-            className={`bg-zinc-800 border rounded-2xl p-4 ${
-              p.status === 'validated' ? 'border-emerald-700 ring-1 ring-emerald-800' : 'border-zinc-700'
+            className={`bg-zinc-700 border rounded-2xl p-4 ${
+              p.status === 'validated' ? 'border-emerald-700 ring-1 ring-emerald-800' : 'border-zinc-600'
             } ${p.status === 'rejected' ? 'opacity-50' : ''}`}
           >
             <div className="flex items-start justify-between gap-2">
@@ -52,7 +52,7 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
               <div className="shrink-0 flex items-center gap-2">
                 {p.price != null && <span className="text-sm font-bold text-zinc-300">{p.price} €</span>}
                 {!isArchived && (
-                  <button onClick={() => setFormTarget(p)} className="text-zinc-600 active:text-amber-400 p-1">
+                  <button onClick={() => setFormTarget(p)} className="text-zinc-600 active:text-copper-400 p-1">
                     <Pencil size={16} />
                   </button>
                 )}
@@ -72,7 +72,7 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
             <div className="flex items-center gap-3 mt-3 text-xs text-zinc-500">
               {author && <span>Proposé par {author.name}</span>}
               {p.url && (
-                <a href={p.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-amber-400 font-medium">
+                <a href={p.url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-copper-400 font-medium">
                   <ExternalLink size={12} /> Voir l'annonce
                 </a>
               )}
@@ -97,7 +97,7 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
               />
               <button
                 onClick={() => setOpenComments(openComments === p.id ? null : p.id)}
-                className="flex items-center gap-1 px-3 py-2 rounded-xl border border-zinc-600 text-zinc-400 text-xs font-semibold active:bg-zinc-700"
+                className="flex items-center gap-1 px-3 py-2 rounded-xl border border-zinc-500 text-zinc-400 text-xs font-semibold active:bg-zinc-600"
               >
                 <MessageSquare size={14} /> {pComments.length || ''}
               </button>
@@ -151,7 +151,7 @@ function VoteButton({ icon: Icon, active, count, onClick, disabled, activeClass 
       onClick={onClick}
       disabled={disabled}
       className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition active:scale-95 ${
-        active ? activeClass : 'border-zinc-600 text-zinc-400'
+        active ? activeClass : 'border-zinc-500 text-zinc-400'
       } ${disabled ? 'opacity-50' : ''}`}
     >
       <Icon size={14} fill={active ? 'currentColor' : 'none'} />
@@ -163,7 +163,7 @@ function VoteButton({ icon: Icon, active, count, onClick, disabled, activeClass 
 function CommentThread({ comments, membersById, currentMember, onComment, disabled }) {
   const [text, setText] = useState('')
   return (
-    <div className="mt-3 pt-3 border-t border-zinc-700 space-y-2">
+    <div className="mt-3 pt-3 border-t border-zinc-600 space-y-2">
       {comments.map((c) => {
         const author = membersById[c.member_id]
         return (
@@ -182,7 +182,7 @@ function CommentThread({ comments, membersById, currentMember, onComment, disabl
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={`Commenter en tant que ${currentMember.name}...`}
-            className="flex-1 px-3 py-2 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+            className="flex-1 px-3 py-2 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
           />
           <button
             onClick={() => {
@@ -225,7 +225,7 @@ function ProposalForm({ proposal, onClose, onSubmit }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full bg-zinc-800 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
+      <div className="relative w-full bg-zinc-700 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-zinc-100">{isEditing ? 'Modifier le logement' : 'Proposer un logement'}</h2>
           <button onClick={onClose} className="p-1 text-zinc-500 active:text-zinc-200">
@@ -237,13 +237,13 @@ function ProposalForm({ proposal, onClose, onSubmit }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Nom du logement"
-            className="w-full px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
           />
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Lien Airbnb / Booking"
-            className="w-full px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
           />
           <input
             value={price}
@@ -251,19 +251,19 @@ function ProposalForm({ proposal, onClose, onSubmit }) {
             type="number"
             inputMode="decimal"
             placeholder="Prix total (€)"
-            className="w-full px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
           />
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Commentaire (optionnel)"
             rows={2}
-            className="w-full px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500 resize-none"
           />
           <button
             onClick={submit}
             disabled={!canSubmit || saving}
-            className="w-full bg-amber-500 disabled:bg-zinc-600 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
+            className="w-full bg-copper-500 disabled:bg-zinc-500 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
           >
             {saving ? 'Enregistrement…' : isEditing ? 'Enregistrer' : 'Ajouter la proposition'}
           </button>

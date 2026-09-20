@@ -14,16 +14,16 @@ export default function Poker({ poker, membersById, members, absentMemberIds, on
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold text-zinc-100">Poker</h1>
         {!isArchived && (
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-1 text-xs font-semibold text-amber-400 active:opacity-70">
+          <button onClick={() => setShowForm(true)} className="flex items-center gap-1 text-xs font-semibold text-copper-400 active:opacity-70">
             <Plus size={14} /> Nouvelle partie
           </button>
         )}
       </div>
 
       {leaderboard.length > 0 && (
-        <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-3.5">
+        <div className="bg-zinc-700 border border-zinc-600 rounded-2xl p-3.5">
           <p className="text-xs font-semibold text-zinc-500 mb-2 flex items-center gap-1">
-            <Trophy size={13} className="text-amber-400" /> Classement général
+            <Trophy size={13} className="text-copper-400" /> Classement général
           </p>
           <div className="space-y-1.5">
             {leaderboard.map((e, i) => (
@@ -74,7 +74,7 @@ function GameCard({ game, results, membersById, onSetResult, onDeleteGame, isArc
   const participants = results.map((r) => membersById[r.member_id]).filter(Boolean)
 
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-3.5">
+    <div className="bg-zinc-700 border border-zinc-600 rounded-2xl p-3.5">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold text-zinc-200">{game.variant}</p>
@@ -87,7 +87,7 @@ function GameCard({ game, results, membersById, onSetResult, onDeleteGame, isArc
         </div>
         {!isArchived && (
           <div className="flex items-center gap-2">
-            <button onClick={() => setEditing((e) => !e)} className="text-xs font-semibold text-amber-400 active:opacity-70">
+            <button onClick={() => setEditing((e) => !e)} className="text-xs font-semibold text-copper-400 active:opacity-70">
               {editing ? 'Fermer' : 'Scores'}
             </button>
             <button
@@ -172,7 +172,7 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
   }
 
   return (
-    <div className="mt-3 pt-3 border-t border-zinc-700 space-y-2">
+    <div className="mt-3 pt-3 border-t border-zinc-600 space-y-2">
       {ranking.map((memberId, i) => (
         <div key={i} className="flex items-center gap-2">
           <span className="text-xs font-semibold text-zinc-500 w-20 shrink-0">
@@ -182,7 +182,7 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
           <select
             value={memberId}
             onChange={(e) => updateRank(i, e.target.value)}
-            className="flex-1 px-2 py-2 rounded-lg bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+            className="flex-1 px-2 py-2 rounded-lg bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
           >
             <option value="">—</option>
             {optionsFor(i).map((m) => (
@@ -197,7 +197,7 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
       <button
         onClick={save}
         disabled={saving}
-        className="w-full bg-zinc-100 disabled:bg-zinc-600 text-zinc-900 text-sm font-semibold py-2.5 rounded-xl active:scale-[0.98] transition"
+        className="w-full bg-zinc-100 disabled:bg-zinc-500 text-zinc-900 text-sm font-semibold py-2.5 rounded-xl active:scale-[0.98] transition"
       >
         {saving ? 'Enregistrement…' : 'Valider le classement'}
       </button>
@@ -262,7 +262,7 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full bg-zinc-800 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] max-h-[85vh] overflow-y-auto">
+      <div className="relative w-full bg-zinc-700 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-zinc-100">Nouvelle partie</h2>
           <button onClick={onClose} className="p-1 text-zinc-500 active:text-zinc-200">
@@ -276,7 +276,7 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
             />
           </div>
           <div>
@@ -285,7 +285,7 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
               value={variant}
               onChange={(e) => setVariant(e.target.value)}
               placeholder="Ex: Texas Hold'em"
-              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
             />
           </div>
           <div>
@@ -295,7 +295,7 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
               inputMode="decimal"
               value={buyIn}
               onChange={(e) => setBuyIn(e.target.value)}
-              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
             />
           </div>
           <div>
@@ -308,7 +308,7 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
                     key={m.id}
                     onClick={() => toggleParticipant(m.id)}
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium text-left ${
-                      checked ? 'border-amber-700 bg-amber-500/10 text-amber-300' : 'border-zinc-600 text-zinc-500'
+                      checked ? 'border-copper-700 bg-copper-500/10 text-copper-300' : 'border-zinc-500 text-zinc-500'
                     }`}
                   >
                     <Avatar member={m} size="sm" />
@@ -335,8 +335,8 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
                       onChange={(e) => !isLast && updatePayout(i, e.target.value)}
                       readOnly={isLast}
                       placeholder={label}
-                      className={`w-full px-3 py-2.5 rounded-xl text-sm text-center outline-none focus:ring-2 focus:ring-amber-500 ${
-                        isLast ? 'bg-zinc-800 text-zinc-400' : 'bg-zinc-700 text-zinc-100'
+                      className={`w-full px-3 py-2.5 rounded-xl text-sm text-center outline-none focus:ring-2 focus:ring-copper-500 ${
+                        isLast ? 'bg-zinc-700 text-zinc-400' : 'bg-zinc-600 text-zinc-100'
                       } ${isLast && remainder < 0 ? 'text-rose-400' : ''}`}
                     />
                     <p className="text-[10px] text-zinc-600 text-center mt-0.5">{label}</p>
@@ -353,7 +353,7 @@ function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
           <button
             onClick={submit}
             disabled={!canSubmit || saving}
-            className="w-full bg-amber-500 disabled:bg-zinc-600 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
+            className="w-full bg-copper-500 disabled:bg-zinc-500 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
           >
             {saving ? 'Création…' : 'Créer la partie'}
           </button>

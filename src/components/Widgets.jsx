@@ -29,7 +29,7 @@ function TricountWidget({ link, onSetLink }) {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://tricount.com/..."
-            className="flex-1 px-3 py-2.5 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+            className="flex-1 px-3 py-2.5 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
           />
           <button
             onClick={() => {

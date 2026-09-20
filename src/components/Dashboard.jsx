@@ -32,9 +32,9 @@ export default function Dashboard({
       </div>
 
       {myTasks.length > 0 && (
-        <div className="bg-amber-500/10 border border-amber-800 rounded-2xl p-3.5">
-          <p className="text-xs font-semibold text-amber-400 mb-1">À toi de jouer</p>
-          <p className="text-sm text-amber-200">
+        <div className="bg-copper-500/10 border border-copper-800 rounded-2xl p-3.5">
+          <p className="text-xs font-semibold text-copper-400 mb-1">À toi de jouer</p>
+          <p className="text-sm text-copper-200">
             Tu t'es assigné : {myTasks.map((t) => t.label).join(', ')}
           </p>
         </div>
@@ -78,10 +78,10 @@ export default function Dashboard({
       {leader && (
         <button
           onClick={() => onNavigate('poker')}
-          className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl p-4 flex items-center gap-3 active:bg-zinc-700 transition text-left"
+          className="w-full bg-zinc-700 border border-zinc-600 rounded-2xl p-4 flex items-center gap-3 active:bg-zinc-600 transition text-left"
         >
-          <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-            <Trophy size={20} className="text-amber-400" />
+          <div className="w-10 h-10 rounded-full bg-copper-500/10 flex items-center justify-center shrink-0">
+            <Trophy size={20} className="text-copper-400" />
           </div>
           <div className="flex-1 min-w-0 flex items-center gap-2">
             <Avatar member={leader.member} size="sm" />
@@ -126,10 +126,10 @@ function LinkCard({ icon: Icon, title, link, onSetLink, placeholder, openLabel }
   const [url, setUrl] = useState(link || '')
 
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-4">
+    <div className="bg-zinc-700 border border-zinc-600 rounded-2xl p-4">
       <div className="flex items-center justify-between mb-1">
         <p className="text-sm font-semibold text-zinc-200 flex items-center gap-1.5">
-          <Icon size={15} className="text-amber-400" /> {title}
+          <Icon size={15} className="text-copper-400" /> {title}
         </p>
         <button onClick={() => setEditing((e) => !e)} className="text-zinc-500 active:text-zinc-300 p-1">
           <Settings2 size={14} />
@@ -142,7 +142,7 @@ function LinkCard({ icon: Icon, title, link, onSetLink, placeholder, openLabel }
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder={placeholder}
-            className="flex-1 px-3 py-2 rounded-xl bg-zinc-700 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-amber-500"
+            className="flex-1 px-3 py-2 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
           />
           <button
             onClick={() => {
@@ -159,7 +159,7 @@ function LinkCard({ icon: Icon, title, link, onSetLink, placeholder, openLabel }
           href={link}
           target="_blank"
           rel="noreferrer"
-          className="text-sm text-amber-400 font-medium flex items-center gap-1 mt-1"
+          className="text-sm text-copper-400 font-medium flex items-center gap-1 mt-1"
         >
           {openLabel} <ExternalLink size={12} />
         </a>
@@ -178,7 +178,7 @@ function formatEventDay(iso) {
 
 function Card({ icon: Icon, color, title, children, onClick }) {
   const colors = {
-    indigo: 'bg-amber-500/10 text-amber-400',
+    indigo: 'bg-copper-500/10 text-copper-400',
     sky: 'bg-sky-500/10 text-sky-400',
     emerald: 'bg-emerald-500/10 text-emerald-400',
     rose: 'bg-rose-500/10 text-rose-400',
@@ -186,7 +186,7 @@ function Card({ icon: Icon, color, title, children, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="bg-zinc-800 border border-zinc-700 rounded-2xl p-3.5 text-left active:bg-zinc-700 transition flex flex-col gap-2"
+      className="bg-zinc-700 border border-zinc-600 rounded-2xl p-3.5 text-left active:bg-zinc-600 transition flex flex-col gap-2"
     >
       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${colors[color]}`}>
         <Icon size={16} />
