@@ -93,7 +93,7 @@ function AddMemberForm({ onAdd, onCancel }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submit()}
-          placeholder="Ton prénom"
+          placeholder="T'es qui toi?"
           autoFocus
           className="flex-1 px-4 py-3 rounded-xl bg-zinc-600 text-sm text-zinc-100 outline-none focus:ring-2 focus:ring-copper-500"
         />
