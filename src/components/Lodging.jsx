@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Heart, ThumbsUp, Plus, ExternalLink, CheckCircle2, MessageSquare, X, Trash2 } from 'lucide-react'
+import { Heart, ThumbsUp, Plus, ExternalLink, CheckCircle2, MessageSquare, X, Trash2, Pencil } from 'lucide-react'
 import { useLockBodyScroll } from '../lib/useLockBodyScroll'
 import Avatar from './Avatar'
 
-export default function Lodging({ proposals, votes, comments, membersById, currentMember, onAdd, onVote, onComment, onValidate, onUnvalidate, onDelete, isArchived }) {
-  const [showForm, setShowForm] = useState(false)
+export default function Lodging({ proposals, votes, comments, membersById, currentMember, onAdd, onEdit, onVote, onComment, onValidate, onUnvalidate, onDelete, isArchived }) {
+  const [formTarget, setFormTarget] = useState(null) // null | 'new' | proposal en cours d'édition
   const [openComments, setOpenComments] = useState(null)
 
   return (
@@ -13,7 +13,7 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
         <h1 className="text-lg font-bold text-zinc-100">Logements</h1>
         {!isArchived && (
           <button
-            onClick={() => setShowForm(true)}
+            onClick={() => setFormTarget('new')}
             className="flex items-center gap-1 text-sm font-semibold text-amber-400 active:opacity-70"
           >
             <Plus size={18} /> Proposer
@@ -51,6 +51,11 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
               </div>
               <div className="shrink-0 flex items-center gap-2">
                 {p.price != null && <span className="text-sm font-bold text-zinc-300">{p.price} €</span>}
+                {!isArchived && (
+                  <button onClick={() => setFormTarget(p)} className="text-zinc-600 active:text-amber-400 p-1">
+                    <Pencil size={16} />
+                  </button>
+                )}
                 {!isArchived && (
                   <button
                     onClick={() => {
@@ -129,7 +134,13 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
         )
       })}
 
-      {showForm && <ProposalForm onClose={() => setShowForm(false)} onSubmit={onAdd} />}
+      {formTarget && (
+        <ProposalForm
+          proposal={formTarget === 'new' ? null : formTarget}
+          onClose={() => setFormTarget(null)}
+          onSubmit={(data) => (formTarget === 'new' ? onAdd(data) : onEdit(formTarget.id, data))}
+        />
+      )}
     </div>
   )
 }
@@ -189,12 +200,13 @@ function CommentThread({ comments, membersById, currentMember, onComment, disabl
   )
 }
 
-function ProposalForm({ onClose, onSubmit }) {
+function ProposalForm({ proposal, onClose, onSubmit }) {
   useLockBodyScroll()
-  const [title, setTitle] = useState('')
-  const [url, setUrl] = useState('')
-  const [price, setPrice] = useState('')
-  const [comment, setComment] = useState('')
+  const isEditing = Boolean(proposal)
+  const [title, setTitle] = useState(proposal?.title || '')
+  const [url, setUrl] = useState(proposal?.url || '')
+  const [price, setPrice] = useState(proposal?.price != null ? String(proposal.price) : '')
+  const [comment, setComment] = useState(proposal?.comment || '')
   const [saving, setSaving] = useState(false)
 
   const canSubmit = title.trim()
@@ -215,7 +227,7 @@ function ProposalForm({ onClose, onSubmit }) {
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative w-full bg-zinc-800 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-zinc-100">Proposer un logement</h2>
+          <h2 className="text-lg font-bold text-zinc-100">{isEditing ? 'Modifier le logement' : 'Proposer un logement'}</h2>
           <button onClick={onClose} className="p-1 text-zinc-500 active:text-zinc-200">
             <X size={22} />
           </button>
@@ -253,7 +265,7 @@ function ProposalForm({ onClose, onSubmit }) {
             disabled={!canSubmit || saving}
             className="w-full bg-amber-500 disabled:bg-zinc-600 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
           >
-            {saving ? 'Ajout…' : 'Ajouter la proposition'}
+            {saving ? 'Enregistrement…' : isEditing ? 'Enregistrer' : 'Ajouter la proposition'}
           </button>
         </div>
       </div>

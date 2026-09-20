@@ -242,6 +242,23 @@ export async function addLodgingProposal(weekend_id, { title, url, price, commen
   return p
 }
 
+export async function updateLodgingProposal(id, { title, url, price, comment }) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('lodging_proposals')
+      .update({ title, url, price, comment })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+  await delay()
+  const p = mock.lodgingProposals.find((x) => x.id === id)
+  if (p) Object.assign(p, { title, url, price, comment })
+  return p
+}
+
 export async function toggleLodgingVote(proposal_id, member_id, vote_type) {
   if (isSupabaseConfigured) {
     const { data: existing } = await supabase
@@ -395,6 +412,23 @@ export async function addAgendaEvent(weekend_id, { day, start_time, end_time, ti
   return e
 }
 
+export async function updateAgendaEvent(id, { title, start_time, end_time, responsible_id }) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('agenda_events')
+      .update({ title, start_time, end_time, responsible_id })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+  await delay()
+  const e = mock.agendaEvents.find((x) => x.id === id)
+  if (e) Object.assign(e, { title, start_time, end_time, responsible_id })
+  return e
+}
+
 export async function deleteAgendaEvent(id) {
   if (isSupabaseConfigured) {
     const { error } = await supabase.from('agenda_events').delete().eq('id', id)
@@ -446,6 +480,23 @@ export async function toggleShoppingItem(id, bought) {
   await delay()
   const item = mock.shoppingItems.find((s) => s.id === id)
   if (item) item.bought = bought
+}
+
+export async function updateShoppingItem(id, { label, quantity }) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('shopping_items')
+      .update({ label, quantity: quantity || null })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+  await delay()
+  const item = mock.shoppingItems.find((s) => s.id === id)
+  if (item) Object.assign(item, { label, quantity: quantity || null })
+  return item
 }
 
 export async function deleteShoppingItem(id) {

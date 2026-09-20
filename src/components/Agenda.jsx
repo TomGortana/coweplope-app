@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, X } from 'lucide-react'
+import { Plus, Trash2, X, Pencil } from 'lucide-react'
 import { useLockBodyScroll } from '../lib/useLockBodyScroll'
 import Avatar from './Avatar'
 
@@ -18,8 +18,9 @@ function buildDays(weekend) {
   return days
 }
 
-export default function Agenda({ weekend, events, membersById, onAdd, onDelete, isArchived }) {
+export default function Agenda({ weekend, events, membersById, onAdd, onEdit, onDelete, isArchived }) {
   const [formDay, setFormDay] = useState(null)
+  const [editingEvent, setEditingEvent] = useState(null)
   const days = buildDays(weekend)
 
   return (
@@ -70,9 +71,14 @@ export default function Agenda({ weekend, events, membersById, onAdd, onDelete, 
                           )}
                         </div>
                         {!isArchived && (
-                          <button onClick={() => onDelete(e.id)} className="text-zinc-600 active:text-rose-500 p-1 shrink-0">
-                            <Trash2 size={16} />
-                          </button>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button onClick={() => setEditingEvent(e)} className="text-zinc-600 active:text-amber-400 p-1">
+                              <Pencil size={16} />
+                            </button>
+                            <button onClick={() => onDelete(e.id)} className="text-zinc-600 active:text-rose-500 p-1">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -92,16 +98,27 @@ export default function Agenda({ weekend, events, membersById, onAdd, onDelete, 
           onSubmit={(data) => onAdd({ ...data, day: formDay })}
         />
       )}
+
+      {editingEvent && (
+        <EventForm
+          event={editingEvent}
+          dayLabel={days.find((d) => d.key === editingEvent.day)?.label}
+          membersById={membersById}
+          onClose={() => setEditingEvent(null)}
+          onSubmit={(data) => onEdit(editingEvent.id, data)}
+        />
+      )}
     </div>
   )
 }
 
-function EventForm({ dayLabel, membersById, onClose, onSubmit }) {
+function EventForm({ event, dayLabel, membersById, onClose, onSubmit }) {
   useLockBodyScroll()
-  const [title, setTitle] = useState('')
-  const [start, setStart] = useState('')
-  const [end, setEnd] = useState('')
-  const [responsible, setResponsible] = useState('')
+  const isEditing = Boolean(event)
+  const [title, setTitle] = useState(event?.title || '')
+  const [start, setStart] = useState(event?.start_time?.slice(0, 5) || '')
+  const [end, setEnd] = useState(event?.end_time?.slice(0, 5) || '')
+  const [responsible, setResponsible] = useState(event?.responsible_id || '')
   const [saving, setSaving] = useState(false)
   const members = Object.values(membersById)
 
@@ -123,7 +140,7 @@ function EventForm({ dayLabel, membersById, onClose, onSubmit }) {
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative w-full bg-zinc-800 rounded-t-3xl p-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-zinc-100">Nouvelle activité</h2>
+          <h2 className="text-lg font-bold text-zinc-100">{isEditing ? "Modifier l'activité" : 'Nouvelle activité'}</h2>
           <button onClick={onClose} className="p-1 text-zinc-500 active:text-zinc-200">
             <X size={22} />
           </button>
@@ -176,7 +193,7 @@ function EventForm({ dayLabel, membersById, onClose, onSubmit }) {
             disabled={!canSubmit || saving}
             className="w-full bg-amber-500 disabled:bg-zinc-600 text-zinc-950 font-semibold py-3.5 rounded-xl active:scale-[0.98] transition"
           >
-            {saving ? 'Ajout…' : `Ajouter à ${dayLabel || ''}`}
+            {saving ? 'Enregistrement…' : isEditing ? 'Enregistrer' : `Ajouter à ${dayLabel || ''}`}
           </button>
         </div>
       </div>

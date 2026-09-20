@@ -165,6 +165,11 @@ export default function App() {
     notify('Logement proposé !', `${actorTag()} a proposé un logement : "${data.title}" sur ${APP_NAME} !`)
   }
 
+  async function handleEditLodging(proposalId, data) {
+    await api.updateLodgingProposal(proposalId, data)
+    await reloadWeekendData()
+  }
+
   async function handleVoteLodging(proposalId, voteType) {
     await api.toggleLodgingVote(proposalId, currentMember.id, voteType)
     await reloadWeekendData()
@@ -198,6 +203,11 @@ export default function App() {
     notify('Activité ajoutée !', `${actorTag()} a ajouté une activité "${data.title}" sur ${APP_NAME} !`)
   }
 
+  async function handleEditAgendaEvent(id, data) {
+    await api.updateAgendaEvent(id, data)
+    await reloadWeekendData()
+  }
+
   async function handleDeleteAgendaEvent(id) {
     await api.deleteAgendaEvent(id)
     await reloadWeekendData()
@@ -205,6 +215,11 @@ export default function App() {
 
   async function handleAddShoppingItem(label, quantity) {
     await api.addShoppingItem(currentWeekend.id, label, currentMember.id, quantity)
+    await reloadWeekendData()
+  }
+
+  async function handleEditShoppingItem(id, data) {
+    await api.updateShoppingItem(id, data)
     await reloadWeekendData()
   }
 
@@ -304,6 +319,7 @@ export default function App() {
             membersById={membersById}
             currentMember={currentMember}
             onAdd={handleAddLodging}
+            onEdit={handleEditLodging}
             onVote={handleVoteLodging}
             onComment={handleCommentLodging}
             onValidate={handleValidateLodging}
@@ -319,6 +335,7 @@ export default function App() {
             events={agendaEvents}
             membersById={membersById}
             onAdd={handleAddAgendaEvent}
+            onEdit={handleEditAgendaEvent}
             onDelete={handleDeleteAgendaEvent}
             isArchived={isArchived}
           />
@@ -330,6 +347,7 @@ export default function App() {
             membersById={membersById}
             currentMember={currentMember}
             onAdd={handleAddShoppingItem}
+            onEdit={handleEditShoppingItem}
             onToggle={handleToggleShoppingItem}
             onAssign={handleAssignShoppingItem}
             onDelete={handleDeleteShoppingItem}
