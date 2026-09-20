@@ -145,6 +145,24 @@ export async function addLodgingComment(proposal_id, member_id, content) {
   return c
 }
 
+export async function deleteLodgingProposal(id) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('lodging_proposals').delete().eq('id', id)
+    if (error) throw error
+    return
+  }
+  await delay()
+  const idx = mock.lodgingProposals.findIndex((p) => p.id === id)
+  if (idx >= 0) mock.lodgingProposals.splice(idx, 1)
+  // mirroring `on delete cascade` from schema.sql for the mock store
+  for (let i = mock.lodgingVotes.length - 1; i >= 0; i--) {
+    if (mock.lodgingVotes[i].proposal_id === id) mock.lodgingVotes.splice(i, 1)
+  }
+  for (let i = mock.lodgingComments.length - 1; i >= 0; i--) {
+    if (mock.lodgingComments[i].proposal_id === id) mock.lodgingComments.splice(i, 1)
+  }
+}
+
 export async function validateLodging(weekend_id, proposal_id) {
   if (isSupabaseConfigured) {
     await supabase.from('lodging_proposals').update({ status: 'rejected' }).eq('weekend_id', weekend_id).neq('id', proposal_id)
@@ -248,6 +266,17 @@ export async function toggleShoppingItem(id, bought) {
   if (item) item.bought = bought
 }
 
+export async function deleteShoppingItem(id) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('shopping_items').delete().eq('id', id)
+    if (error) throw error
+    return
+  }
+  await delay()
+  const idx = mock.shoppingItems.findIndex((s) => s.id === id)
+  if (idx >= 0) mock.shoppingItems.splice(idx, 1)
+}
+
 export async function assignShoppingItem(id, member_id) {
   if (isSupabaseConfigured) {
     const { error } = await supabase.from('shopping_items').update({ assigned_to: member_id }).eq('id', id)
@@ -319,6 +348,21 @@ export async function setPokerResult(game_id, member_id, net_result) {
   return r
 }
 
+export async function deletePokerGame(id) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('poker_games').delete().eq('id', id)
+    if (error) throw error
+    return
+  }
+  await delay()
+  const idx = mock.pokerGames.findIndex((g) => g.id === id)
+  if (idx >= 0) mock.pokerGames.splice(idx, 1)
+  // mirroring `on delete cascade` from schema.sql for the mock store
+  for (let i = mock.pokerResults.length - 1; i >= 0; i--) {
+    if (mock.pokerResults[i].game_id === id) mock.pokerResults.splice(i, 1)
+  }
+}
+
 // ---------- TRICOUNT ----------
 export async function getTricountLink(weekendId) {
   if (isSupabaseConfigured) {
@@ -354,6 +398,13 @@ export async function setTricountLink(weekend_id, url) {
 // Les soldes Tricount ne peuvent pas être récupérés en direct (pas
 // d'API publique tierce) : on affiche un "miroir" simulé, éditable
 // à la main. Voir le guide de mise en place pour les alternatives.
-export function getTricountBalances() {
+// Le miroir est indexé par nom de membre (voir mockData.js) : on fait
+// donc la correspondance avec les vrais membres (id UUID) par nom.
+export function getTricountBalances(members = []) {
   return mock.tricountBalances
+    .map((b) => {
+      const member = members.find((m) => m.name === b.name)
+      return member ? { member_id: member.id, balance: b.balance } : null
+    })
+    .filter(Boolean)
 }

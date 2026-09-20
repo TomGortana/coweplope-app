@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Heart, ThumbsUp, Plus, ExternalLink, CheckCircle2, MessageSquare, X } from 'lucide-react'
+import { Heart, ThumbsUp, Plus, ExternalLink, CheckCircle2, MessageSquare, X, Trash2 } from 'lucide-react'
 
-export default function Lodging({ proposals, votes, comments, membersById, currentMember, onAdd, onVote, onComment, onValidate, isArchived }) {
+export default function Lodging({ proposals, votes, comments, membersById, currentMember, onAdd, onVote, onComment, onValidate, onDelete, isArchived }) {
   const [showForm, setShowForm] = useState(false)
   const [openComments, setOpenComments] = useState(null)
 
@@ -47,7 +47,19 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
                 </div>
                 {p.comment && <p className="text-sm text-slate-500 mt-0.5">{p.comment}</p>}
               </div>
-              {p.price != null && <span className="shrink-0 text-sm font-bold text-slate-700">{p.price} €</span>}
+              <div className="shrink-0 flex items-center gap-2">
+                {p.price != null && <span className="text-sm font-bold text-slate-700">{p.price} €</span>}
+                {!isArchived && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`Supprimer la proposition "${p.title}" ?`)) onDelete(p.id)
+                    }}
+                    className="text-slate-300 active:text-rose-500 p-1"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-3 mt-3 text-xs text-slate-400">

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Plus, Check, User } from 'lucide-react'
+import { Plus, Check, User, Trash2 } from 'lucide-react'
 
-export default function Shopping({ items, membersById, currentMember, onAdd, onToggle, onAssign, isArchived }) {
+export default function Shopping({ items, membersById, currentMember, onAdd, onToggle, onAssign, onDelete, isArchived }) {
   const [text, setText] = useState('')
   const todo = items.filter((i) => !i.bought)
   const done = items.filter((i) => i.bought)
@@ -44,6 +44,7 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onT
             currentMember={currentMember}
             onToggle={onToggle}
             onAssign={onAssign}
+            onDelete={onDelete}
             isArchived={isArchived}
           />
         ))}
@@ -61,6 +62,7 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onT
                 currentMember={currentMember}
                 onToggle={onToggle}
                 onAssign={onAssign}
+                onDelete={onDelete}
                 isArchived={isArchived}
               />
             ))}
@@ -73,8 +75,15 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onT
   )
 }
 
-function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, isArchived }) {
+function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, onDelete, isArchived }) {
   const assignee = membersById[item.assigned_to]
+
+  function handleDelete() {
+    if (window.confirm(`Supprimer "${item.label}" de la liste ?`)) {
+      onDelete(item.id)
+    }
+  }
+
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-3 flex items-center gap-3">
       <button
@@ -100,6 +109,11 @@ function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, isA
             <User size={12} /> Je m'en occupe
           </button>
         ))}
+      {!isArchived && (
+        <button onClick={handleDelete} className="text-slate-300 active:text-rose-500 p-1 shrink-0">
+          <Trash2 size={16} />
+        </button>
+      )}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ExternalLink, Settings2, Plus, Trophy, X } from 'lucide-react'
+import { ExternalLink, Settings2, Plus, Trophy, X, Trash2 } from 'lucide-react'
 
 export default function Widgets({
   tricountLink,
@@ -10,6 +10,7 @@ export default function Widgets({
   poker,
   onAddGame,
   onSetResult,
+  onDeleteGame,
   isArchived,
 }) {
   return (
@@ -22,7 +23,14 @@ export default function Widgets({
         membersById={membersById}
         currentMember={currentMember}
       />
-      <PokerWidget poker={poker} membersById={membersById} onAddGame={onAddGame} onSetResult={onSetResult} isArchived={isArchived} />
+      <PokerWidget
+        poker={poker}
+        membersById={membersById}
+        onAddGame={onAddGame}
+        onSetResult={onSetResult}
+        onDeleteGame={onDeleteGame}
+        isArchived={isArchived}
+      />
     </div>
   )
 }
@@ -114,7 +122,7 @@ function TricountWidget({ link, onSetLink, balances, membersById, currentMember 
   )
 }
 
-function PokerWidget({ poker, membersById, onAddGame, onSetResult, isArchived }) {
+function PokerWidget({ poker, membersById, onAddGame, onSetResult, onDeleteGame, isArchived }) {
   const [showForm, setShowForm] = useState(false)
   const leaderboard = computeLeaderboard(poker, membersById)
 
@@ -153,7 +161,15 @@ function PokerWidget({ poker, membersById, onAddGame, onSetResult, isArchived })
 
       <div className="space-y-3">
         {poker.games.map((g) => (
-          <GameCard key={g.id} game={g} results={poker.results.filter((r) => r.game_id === g.id)} membersById={membersById} onSetResult={onSetResult} isArchived={isArchived} />
+          <GameCard
+            key={g.id}
+            game={g}
+            results={poker.results.filter((r) => r.game_id === g.id)}
+            membersById={membersById}
+            onSetResult={onSetResult}
+            onDeleteGame={onDeleteGame}
+            isArchived={isArchived}
+          />
         ))}
       </div>
 
@@ -167,7 +183,7 @@ function PokerWidget({ poker, membersById, onAddGame, onSetResult, isArchived })
   )
 }
 
-function GameCard({ game, results, membersById, onSetResult, isArchived }) {
+function GameCard({ game, results, membersById, onSetResult, onDeleteGame, isArchived }) {
   const [editing, setEditing] = useState(false)
   const members = Object.values(membersById)
 
@@ -181,9 +197,21 @@ function GameCard({ game, results, membersById, onSetResult, isArchived }) {
           </p>
         </div>
         {!isArchived && (
-          <button onClick={() => setEditing((e) => !e)} className="text-xs font-semibold text-indigo-600 active:opacity-70">
-            {editing ? 'Fermer' : 'Scores'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setEditing((e) => !e)} className="text-xs font-semibold text-indigo-600 active:opacity-70">
+              {editing ? 'Fermer' : 'Scores'}
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm(`Supprimer la partie du ${new Date(game.game_date).toLocaleDateString('fr-FR')} ?`)) {
+                  onDeleteGame(game.id)
+                }
+              }}
+              className="text-slate-300 active:text-rose-500 p-1"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
         )}
       </div>
 

@@ -39,7 +39,7 @@ export default function App() {
   const currentMember = membersById[currentMemberId] || members[0]
   const currentWeekend = weekends.find((w) => w.id === currentWeekendId) || weekends[0]
   const isArchived = currentWeekend?.status === 'archived'
-  const balances = api.getTricountBalances()
+  const balances = api.getTricountBalances(members)
 
   // Chargement initial : membres + éditions
   useEffect(() => {
@@ -137,6 +137,11 @@ export default function App() {
     notify('Logement validé ✅', `${actorTag()} a validé le logement "${p?.title}" sur ${APP_NAME} !`)
   }
 
+  async function handleDeleteLodging(proposalId) {
+    await api.deleteLodgingProposal(proposalId)
+    await reloadWeekendData()
+  }
+
   async function handleAddAgendaEvent(data) {
     await api.addAgendaEvent(currentWeekend.id, { ...data, responsible_id: data.responsible_id || null })
     await reloadWeekendData()
@@ -163,6 +168,11 @@ export default function App() {
     await reloadWeekendData()
   }
 
+  async function handleDeleteShoppingItem(id) {
+    await api.deleteShoppingItem(id)
+    await reloadWeekendData()
+  }
+
   async function handleSetTricountLink(url) {
     const t = await api.setTricountLink(currentWeekend.id, url)
     setTricountLinkState(t)
@@ -177,6 +187,11 @@ export default function App() {
 
   async function handleSetPokerResult(gameId, memberId, value) {
     await api.setPokerResult(gameId, memberId, value)
+    await reloadWeekendData()
+  }
+
+  async function handleDeletePokerGame(id) {
+    await api.deletePokerGame(id)
     await reloadWeekendData()
   }
 
@@ -237,6 +252,7 @@ export default function App() {
             onVote={handleVoteLodging}
             onComment={handleCommentLodging}
             onValidate={handleValidateLodging}
+            onDelete={handleDeleteLodging}
             isArchived={isArchived}
           />
         )}
@@ -259,6 +275,7 @@ export default function App() {
             onAdd={handleAddShoppingItem}
             onToggle={handleToggleShoppingItem}
             onAssign={handleAssignShoppingItem}
+            onDelete={handleDeleteShoppingItem}
             isArchived={isArchived}
           />
         )}
@@ -273,6 +290,7 @@ export default function App() {
             poker={poker}
             onAddGame={handleAddPokerGame}
             onSetResult={handleSetPokerResult}
+            onDeleteGame={handleDeletePokerGame}
             isArchived={isArchived}
           />
         )}

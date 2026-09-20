@@ -28,7 +28,7 @@ Sans configuration, l'app tourne en **mode démo** avec des données simulées e
 ## Connecter Supabase (données persistantes et partagées)
 
 1. Crée un projet sur [supabase.com](https://supabase.com)
-2. Exécute `../schema.sql` dans le SQL Editor du projet
+2. Exécute `schema.sql` dans le SQL Editor du projet (ce fichier est un journal cumulatif — voir son en-tête pour la marche à suivre lors des évolutions futures du schéma)
 3. Copie `.env.example` en `.env` et renseigne `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` (Project Settings → Data API)
 4. Dans **Data API → Settings**, vérifie que les 10 tables sont bien dans "Exposed tables"
 5. Relance `npm run dev`
