@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Plus, Trash2, X } from 'lucide-react'
+import { useLockBodyScroll } from '../lib/useLockBodyScroll'
 
 function buildDays(weekend) {
   if (!weekend?.start_date || !weekend?.end_date) return []
@@ -95,6 +96,7 @@ export default function Agenda({ weekend, events, membersById, onAdd, onDelete, 
 }
 
 function EventForm({ dayLabel, membersById, onClose, onSubmit }) {
+  useLockBodyScroll()
   const [title, setTitle] = useState('')
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')

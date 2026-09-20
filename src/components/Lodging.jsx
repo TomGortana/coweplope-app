@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Heart, ThumbsUp, Plus, ExternalLink, CheckCircle2, MessageSquare, X, Trash2 } from 'lucide-react'
+import { useLockBodyScroll } from '../lib/useLockBodyScroll'
 
 export default function Lodging({ proposals, votes, comments, membersById, currentMember, onAdd, onVote, onComment, onValidate, onUnvalidate, onDelete, isArchived }) {
   const [showForm, setShowForm] = useState(false)
@@ -188,6 +189,7 @@ function CommentThread({ comments, membersById, currentMember, onComment, disabl
 }
 
 function ProposalForm({ onClose, onSubmit }) {
+  useLockBodyScroll()
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
   const [price, setPrice] = useState('')

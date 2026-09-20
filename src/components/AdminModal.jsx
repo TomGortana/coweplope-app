@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { X, Plus, Trash2 } from 'lucide-react'
 import { getWhatsAppGroupLink, setWhatsAppGroupLink } from '../lib/whatsapp'
+import { useLockBodyScroll } from '../lib/useLockBodyScroll'
 
 const COLOR_PRESETS = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#0ea5e9', '#ef4444']
 
 export default function AdminModal({ onClose, onCreateWeekend, members, onAddMember, onDeleteMember }) {
+  useLockBodyScroll()
   const [name, setName] = useState('')
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Plus, Trophy, X, Trash2 } from 'lucide-react'
+import { useLockBodyScroll } from '../lib/useLockBodyScroll'
 
 const RANK_LABELS = ['1er', '2e', '3e']
 
@@ -205,6 +206,7 @@ function PodiumEditor({ game, results, participants, onSetResult, onDone }) {
 }
 
 function GameForm({ members, absentMemberIds, onClose, onSubmit }) {
+  useLockBodyScroll()
   const [date, setDate] = useState('')
   const [variant, setVariant] = useState("Texas Hold'em")
   const [buyIn, setBuyIn] = useState('10')

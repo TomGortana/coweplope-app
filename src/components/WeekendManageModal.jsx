@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
+import { useLockBodyScroll } from '../lib/useLockBodyScroll'
 
 export default function WeekendManageModal({ weekend, members, absentMemberIds, onClose, onSave, onDelete }) {
+  useLockBodyScroll()
   const [name, setName] = useState(weekend.name)
   const [start, setStart] = useState(weekend.start_date)
   const [end, setEnd] = useState(weekend.end_date)
