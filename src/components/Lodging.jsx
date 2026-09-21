@@ -29,6 +29,8 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
         const pVotes = votes.filter((v) => v.proposal_id === p.id)
         const hearts = pVotes.filter((v) => v.vote_type === 'heart')
         const thumbs = pVotes.filter((v) => v.vote_type === 'thumbs_up')
+        const heartVoters = hearts.map((v) => membersById[v.member_id]).filter(Boolean)
+        const thumbVoters = thumbs.map((v) => membersById[v.member_id]).filter(Boolean)
         const myHeart = pVotes.some((v) => v.member_id === currentMember.id && v.vote_type === 'heart')
         const myThumb = pVotes.some((v) => v.member_id === currentMember.id && v.vote_type === 'thumbs_up')
         const pComments = comments.filter((c) => c.proposal_id === p.id)
@@ -82,7 +84,7 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
               <VoteButton
                 icon={Heart}
                 active={myHeart}
-                count={hearts.length}
+                voters={heartVoters}
                 onClick={() => onVote(p.id, 'heart')}
                 disabled={isArchived}
                 activeClass="bg-rose-500/10 text-rose-400 border-rose-800"
@@ -90,7 +92,7 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
               <VoteButton
                 icon={ThumbsUp}
                 active={myThumb}
-                count={thumbs.length}
+                voters={thumbVoters}
                 onClick={() => onVote(p.id, 'thumbs_up')}
                 disabled={isArchived}
                 activeClass="bg-sky-500/10 text-sky-400 border-sky-800"
@@ -121,6 +123,14 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
               )}
             </div>
 
+            {(heartVoters.length > 0 || thumbVoters.length > 0) && (
+              <p className="text-[11px] text-zinc-500 mt-1.5">
+                {heartVoters.length > 0 && <>❤️ {heartVoters.map((m) => m.name).join(', ')}</>}
+                {heartVoters.length > 0 && thumbVoters.length > 0 && '  ·  '}
+                {thumbVoters.length > 0 && <>👍 {thumbVoters.map((m) => m.name).join(', ')}</>}
+              </p>
+            )}
+
             {openComments === p.id && (
               <CommentThread
                 comments={pComments}
@@ -145,7 +155,7 @@ export default function Lodging({ proposals, votes, comments, membersById, curre
   )
 }
 
-function VoteButton({ icon: Icon, active, count, onClick, disabled, activeClass }) {
+function VoteButton({ icon: Icon, active, voters, onClick, disabled, activeClass }) {
   return (
     <button
       onClick={onClick}
@@ -155,7 +165,7 @@ function VoteButton({ icon: Icon, active, count, onClick, disabled, activeClass 
       } ${disabled ? 'opacity-50' : ''}`}
     >
       <Icon size={14} fill={active ? 'currentColor' : 'none'} />
-      {count > 0 && count}
+      {voters.length > 0 && voters.length}
     </button>
   )
 }

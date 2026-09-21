@@ -89,7 +89,9 @@ export default function Shopping({ items, membersById, currentMember, onAdd, onE
 }
 
 function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, onEdit, onDelete, isArchived }) {
+  const [assigning, setAssigning] = useState(false)
   const assignee = membersById[item.assigned_to]
+  const members = Object.values(membersById)
 
   function handleDelete() {
     if (window.confirm(`Supprimer "${item.label}" de la liste ?`)) {
@@ -97,48 +99,85 @@ function ShoppingRow({ item, membersById, currentMember, onToggle, onAssign, onE
     }
   }
 
-  return (
-    <div className="bg-zinc-700 border border-zinc-600 rounded-xl p-3 flex items-start gap-3">
-      <button
-        onClick={() => !isArchived && onToggle(item.id, !item.bought)}
-        disabled={isArchived}
-        className={`w-6 h-6 mt-0.5 shrink-0 rounded-lg border-2 flex items-center justify-center transition ${
-          item.bought ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-500'
-        }`}
-      >
-        {item.bought && <Check size={14} className="text-white" strokeWidth={3} />}
-      </button>
+  function pick(memberId) {
+    onAssign(item.id, memberId)
+    setAssigning(false)
+  }
 
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm text-zinc-200 break-words ${item.bought ? 'line-through text-zinc-500' : ''}`}>
-          {item.label}
-        </p>
+  return (
+    <div className="bg-zinc-700 border border-zinc-600 rounded-xl p-3">
+      <div className="flex items-start gap-3">
+        <button
+          onClick={() => !isArchived && onToggle(item.id, !item.bought)}
+          disabled={isArchived}
+          className={`w-6 h-6 mt-0.5 shrink-0 rounded-lg border-2 flex items-center justify-center transition ${
+            item.bought ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-500'
+          }`}
+        >
+          {item.bought && <Check size={14} className="text-white" strokeWidth={3} />}
+        </button>
+
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm text-zinc-200 break-words ${item.bought ? 'line-through text-zinc-500' : ''}`}>
+            {item.label}
+          </p>
+          {!isArchived && (
+            <div className="mt-1.5">
+              {assignee ? (
+                <button
+                  onClick={() => setAssigning((a) => !a)}
+                  className="flex items-center gap-1 text-xs font-medium text-zinc-400 active:text-zinc-200"
+                >
+                  <Avatar member={assignee} size="sm" /> {assignee.name}
+                </button>
+              ) : (
+                <button
+                  onClick={() => (currentMember ? pick(currentMember.id) : setAssigning(true))}
+                  className="flex items-center gap-1 text-xs font-semibold text-copper-400 border border-copper-800 rounded-lg px-2 py-1 active:bg-copper-500/10"
+                >
+                  <User size={12} /> Je m'en occupe
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
         {!isArchived && (
-          <div className="mt-1.5">
-            {assignee ? (
-              <span className="text-xs font-medium text-zinc-400 flex items-center gap-1">
-                <Avatar member={assignee} size="sm" /> {assignee.name}
-              </span>
-            ) : (
-              <button
-                onClick={() => onAssign(item.id, currentMember.id)}
-                className="flex items-center gap-1 text-xs font-semibold text-copper-400 border border-copper-800 rounded-lg px-2 py-1 active:bg-copper-500/10"
-              >
-                <User size={12} /> Je m'en occupe
-              </button>
-            )}
+          <div className="flex items-center gap-1 shrink-0">
+            <button onClick={onEdit} className="text-zinc-600 active:text-copper-400 p-1">
+              <Pencil size={16} />
+            </button>
+            <button onClick={handleDelete} className="text-zinc-600 active:text-rose-500 p-1">
+              <Trash2 size={16} />
+            </button>
           </div>
         )}
       </div>
 
-      {!isArchived && (
-        <div className="flex items-center gap-1 shrink-0">
-          <button onClick={onEdit} className="text-zinc-600 active:text-copper-400 p-1">
-            <Pencil size={16} />
-          </button>
-          <button onClick={handleDelete} className="text-zinc-600 active:text-rose-500 p-1">
-            <Trash2 size={16} />
-          </button>
+      {assigning && !isArchived && (
+        <div className="mt-2.5 pt-2.5 border-t border-zinc-600">
+          <p className="text-[11px] text-zinc-500 mb-1.5">Assigner à...</p>
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              onClick={() => pick(null)}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border ${
+                !assignee ? 'bg-copper-500/10 border-copper-700 text-copper-300' : 'border-zinc-500 text-zinc-400'
+              }`}
+            >
+              Personne
+            </button>
+            {members.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => pick(m.id)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border ${
+                  item.assigned_to === m.id ? 'bg-copper-500/10 border-copper-700 text-copper-300' : 'border-zinc-500 text-zinc-400'
+                }`}
+              >
+                <Avatar member={m} size="sm" /> {m.name}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
